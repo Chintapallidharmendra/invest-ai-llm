@@ -1,0 +1,6 @@
+# Context is the repo root; only the frontend sources and the Caddyfile are needed.
+**
+!frontend/
+!deploy/caddy/Caddyfile
+frontend/node_modules/
+frontend/dist/
