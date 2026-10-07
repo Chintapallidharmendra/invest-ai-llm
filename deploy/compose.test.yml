@@ -1,0 +1,65 @@
+# Test dependencies for local and CI runs (Story 1.6; ADR-037).
+#
+#   docker compose -f deploy/compose.test.yml up -d --wait
+#   cd backend && uv run pytest          # fixtures find the ports via `docker compose port`
+#   docker compose -f deploy/compose.test.yml down
+#
+# PostgreSQL 18 + pgvector and Valkey, published on 127.0.0.1 only, on ephemeral host
+# ports. Data lives in tmpfs and is gone on `down`. The roles are created by the same
+# init script as production (deploy/postgres/init/01_roles.sql), so RLS tests run against
+# the real app_migrator / app_rw split. The passwords below are throwaway test values for
+# a loopback-only database; production passwords come from Compose secrets.
+name: invest-ai-llm-test
+
+x-test-password: &test-password
+  uid: "999"
+  gid: "999"
+  mode: 0400
+
+configs:
+  pg_superuser_password:
+    content: test-superuser
+  pg_migrator_password:
+    content: test-migrator
+  pg_app_rw_password:
+    content: test-app-rw
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    pull_policy: never
+    # Durability is irrelevant for throwaway data; these make the suite faster.
+    command: ["postgres", "-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off"]
+    environment:
+      POSTGRES_DB: invest_ai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_superuser_password
+    configs:
+      - { source: pg_superuser_password, target: /run/secrets/db_superuser_password, <<: *test-password }
+      - { source: pg_migrator_password, target: /run/secrets/db_migrator_password, <<: *test-password }
+      - { source: pg_app_rw_password, target: /run/secrets/db_app_rw_password, <<: *test-password }
+    volumes:
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    tmpfs:
+      - /var/lib/postgresql:uid=999,gid=999
+    ports:
+      - "127.0.0.1::5432"
+    healthcheck:
+      # TCP, not the socket: the init phase runs a socket-only server that would pass early.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "invest_ai"]
+      interval: 1s
+      timeout: 3s
+      retries: 60
+
+  valkey:
+    image: valkey/valkey:8
+    pull_policy: never
+    user: "999:999"
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "127.0.0.1::6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
