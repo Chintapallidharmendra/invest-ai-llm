@@ -1,0 +1,91 @@
+[project]
+name = "invest-ai-llm-backend"
+version = "0.1.0"
+description = "invest-ai-llm: self-hosted confidential document assistant (FastAPI backend + worker)"
+readme = "../README.md"
+requires-python = ">=3.13,<3.14"
+# Dependencies are declared once here (Story 1.1). Later stories must not edit this
+# file; a missing dependency goes in a follow-up story owned by the builder.
+dependencies = [
+    # Web and API
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic>=2",
+    "pydantic-settings",
+    "python-multipart",
+    "httpx",
+    # Database
+    "sqlalchemy[asyncio]>=2",
+    "asyncpg",
+    "alembic",
+    "pgvector",
+    # Shared state (Valkey over Redis for licence, ADR-018)
+    "valkey",
+    # Security
+    "pwdlib[argon2]",
+    "cryptography",
+    # IDs (UUIDv7; Python 3.13 stdlib has no uuid7)
+    "uuid-utils",
+    # Observability
+    "structlog",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp",
+    "opentelemetry-instrumentation-fastapi",
+    "prometheus-client",
+    # LLM
+    "openai",
+    "pydantic-ai-slim[openai]",
+    # Guardrails
+    "presidio-analyzer",
+    "spacy",
+    # Documents and sheets
+    "fastembed",
+    "polars",
+    "openpyxl",
+    "pypdfium2",
+    "python-docx",
+    "lark",
+    # Jobs
+    "apscheduler>=3.10,<4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+    "mypy",
+    "import-linter",
+    "faker",
+    "reportlab",   # synthetic corpus generation (Story 1.7)
+    "python-pptx", # synthetic corpus generation (Story 1.7)
+    "locust",      # load tests (Story 7.11)
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "S", "ASYNC", "SIM", "RUF", "PL", "N", "C4", "PT"]
+ignore = ["PLR0913"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

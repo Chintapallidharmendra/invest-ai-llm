@@ -1,0 +1,35 @@
+# --- Confidential data: never in the repo (ADR-035) ---
+/data/
+**/backups/
+*.kek
+.env
+.env.*
+!.env.example
+deploy/secrets/*
+!deploy/secrets/README.md
+
+# --- Evals build outputs ---
+evals/corpus/build/
+evals/reports/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.import_linter_cache/
+
+# --- Node / frontend ---
+node_modules/
+dist/
+frontend/test-results/
+frontend/playwright-report/
+
+# --- OS / editors ---
+.DS_Store
+.idea/
+.vscode/

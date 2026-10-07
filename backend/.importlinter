@@ -1,0 +1,94 @@
+; ADR-038 module boundaries. Run from backend/: `uv run lint-imports`.
+[importlinter]
+root_package = app
+include_external_packages = True
+
+[importlinter:contract:no-web-framework-in-plain-modules]
+name = Plain-Python modules never import fastapi/starlette (documents only via documents.routes)
+type = forbidden
+source_modules =
+    app.crypto
+    app.assistant
+    app.guardrails
+    app.llm
+    app.sheets
+    app.documents
+forbidden_modules =
+    fastapi
+    starlette
+ignore_imports =
+    app.documents.routes -> fastapi
+    app.documents.routes -> starlette
+; app.documents.routes is created by a later story; don't alert while it is absent.
+unmatched_ignore_imports_alerting = none
+
+[importlinter:contract:only-crypto-imports-cryptography]
+name = Only app.crypto imports cryptography
+type = forbidden
+source_modules =
+    app.core
+    app.auth
+    app.spaces
+    app.chat
+    app.assistant
+    app.guardrails
+    app.llm
+    app.documents
+    app.sheets
+    app.outputs
+    app.jobs
+    app.lifecycle
+    app.audit
+    app.compliance
+    app.admin
+    app.api
+    app.worker
+forbidden_modules =
+    cryptography
+
+[importlinter:contract:only-llm-imports-openai]
+name = Only app.llm imports openai directly (pydantic_ai's internal use is allowed)
+type = forbidden
+source_modules =
+    app.core
+    app.crypto
+    app.auth
+    app.spaces
+    app.chat
+    app.assistant
+    app.guardrails
+    app.documents
+    app.sheets
+    app.outputs
+    app.jobs
+    app.lifecycle
+    app.audit
+    app.compliance
+    app.admin
+    app.api
+    app.worker
+forbidden_modules =
+    openai
+allow_indirect_imports = True
+
+[importlinter:contract:domain-never-imports-edges]
+name = Domain modules never import app.api, app.admin or app.chat
+type = forbidden
+source_modules =
+    app.core
+    app.crypto
+    app.auth
+    app.spaces
+    app.assistant
+    app.guardrails
+    app.llm
+    app.documents
+    app.sheets
+    app.outputs
+    app.jobs
+    app.lifecycle
+    app.audit
+forbidden_modules =
+    app.api
+    app.admin
+    app.chat

@@ -1,0 +1,17 @@
+[project]
+name = "invest-ai-llm-parser"
+version = "0.1.0"
+description = "invest-ai-llm parser container: Docling, OCR and openpyxl parsing; no app DB access (ADR-027)"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+# Parser runtime dependencies only, declared once (Story 1.1).
+dependencies = [
+    "docling",
+    "rapidocr-onnxruntime",
+    "openpyxl",
+    "polars",
+    "pydantic>=2",
+]
+
+[tool.uv]
+package = false

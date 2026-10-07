@@ -1,0 +1,24 @@
+# Gitleaks config: default rules plus project-specific ones. No secrets in the repo (ADR-021).
+title = "invest-ai-llm gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "kek-material"
+description = "Key-encryption-key material (KEK files are root-only on the host, never committed)"
+regex = '''(?i)(kek|master[_-]?key)\s*[:=]\s*['"]?[A-Za-z0-9+/=_-]{32,}'''
+keywords = ["kek", "master_key", "master-key", "masterkey"]
+
+[[rules]]
+id = "session-or-link-secret"
+description = "Hard-coded session, CSRF or one-time-link signing secret"
+regex = '''(?i)(session|csrf|link|signing)[_-]?secret\s*[:=]\s*['"][^'"\s]{16,}['"]'''
+keywords = ["secret"]
+
+[allowlist]
+description = "Lockfiles contain integrity hashes, not secrets"
+paths = [
+  '''(^|/)uv\.lock$''',
+  '''(^|/)pnpm-lock\.yaml$''',
+]
