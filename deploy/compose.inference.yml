@@ -1,3 +1,68 @@
-# Included by compose.yml. Placeholder created by Story 1.3.
-# Story 1.4: vllm-chat and vllm-guard on the A10 (network: inference).
-services: {}
+# Inference services (Story 1.4; ADR-009, ADR-034). Included by compose.yml.
+#
+# Both servers share the A10-24Q. Attached ONLY to the internal `inference` network,
+# no published ports. Weights come read-only from /data/models; no runtime downloads.
+# Launch arguments live in deploy/vllm/{chat,guard}.env.
+#
+# Image: vllm/vllm-openai:v0.31.0-cu129. The default v0.31.0 image is CUDA 13.0 and
+# needs driver >= 580; the VM has driver 570 (CUDA 12.8), which runs CUDA 12.9 builds
+# through CUDA minor-version compatibility. See deploy/vllm/README.md.
+
+x-vllm: &vllm
+  image: vllm/vllm-openai:${VLLM_VERSION:-v0.31.0-cu129}
+  pull_policy: never
+  restart: unless-stopped
+  # The image's entrypoint is `vllm serve`; word-split VLLM_ARGS from the env file.
+  entrypoint: ["/bin/sh", "-c", 'exec vllm serve "$$VLLM_MODEL" $$VLLM_ARGS']
+  networks: [inference]
+  shm_size: 4gb
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            device_ids: ["0"]
+            capabilities: [gpu]
+  healthcheck:
+    test:
+      - CMD
+      - python3
+      - -c
+      - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+    interval: 15s
+    timeout: 5s
+    retries: 5
+    # Weight loading + torch.compile + CUDA-graph capture take minutes on first start.
+    start_period: 900s
+  logging:
+    driver: local
+    options:
+      max-size: 20m
+      max-file: "5"
+
+services:
+  vllm-chat:
+    <<: *vllm
+    env_file: [vllm/chat.env]
+    volumes:
+      - ${APP_DATA_DIR:-/data}/models:/models:ro
+      # torch.compile / Triton / FlashInfer caches: persistent, so restarts are faster.
+      - ${APP_DATA_DIR:-/data}/vllm-cache/chat:/root/.cache
+
+  vllm-guard:
+    <<: *vllm
+    env_file: [vllm/guard.env]
+    volumes:
+      - ${APP_DATA_DIR:-/data}/models:/models:ro
+      - ${APP_DATA_DIR:-/data}/vllm-cache/guard:/root/.cache
+    # Start after chat has profiled and claimed its share, so the two memory profiles
+    # never overlap.
+    depends_on:
+      vllm-chat:
+        condition: service_healthy
+
+networks:
+  inference:
+    internal: true
