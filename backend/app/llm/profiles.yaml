@@ -1,0 +1,35 @@
+# LLM profiles (Story 1.5; ADR-009, NFR-015). Code refers only to the logical names
+# `chat` and `guard`; which server and model they mean is configuration only.
+# Base URLs can be overridden per environment with APP_LLM_BASE_URLS (JSON map).
+#
+# Capability flags follow the deploy/vllm/smoke.sh findings for the pinned vLLM:
+#   supports_cache_salt: false  -> the gateway refuses to start unless
+#                                  APP_LLM_PREFIX_CACHING_DISABLED=true (ADR-031)
+#   supports_priority:   false  -> the `priority` field is omitted (ADR-029)
+# The gateway sets `cache_salt` and `priority` itself; extra_body must not contain them.
+profiles:
+  chat:
+    base_url: http://vllm-chat:8000/v1
+    served_model: chat
+    max_tokens: 1024
+    extra_body:
+      chat_template_kwargs:
+        enable_thinking: false   # Qwen3 thinking breaks hermes tool parsing (ADR-009)
+    supports_cache_salt: true
+    supports_priority: true     # vllm-chat runs --scheduling-policy priority
+    timeouts:
+      connect_s: 2
+      first_token_s: 10
+      total_s: 60
+
+  guard:
+    base_url: http://vllm-guard:8000/v1
+    served_model: guard
+    max_tokens: 32
+    temperature: 0
+    extra_body: {}
+    supports_cache_salt: true
+    supports_priority: false    # vllm-guard runs the default FCFS scheduler
+    timeouts:
+      connect_s: 2
+      total_s: 3
