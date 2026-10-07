@@ -1,0 +1,9 @@
+# Corpus tests (Story 1.7): the backend rules with the usual test allowances.
+extend = "../../../backend/pyproject.toml"
+src = [".."]
+
+[lint]
+extend-ignore = ["S101", "PLR2004"]
+
+[lint.isort]
+known-first-party = ["generate", "check_corpus"]

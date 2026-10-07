@@ -1,0 +1,16 @@
+# Generator scripts (Story 1.7): the backend rules, plus allowances that fit seeded
+# fabrication code. `random` is intentional (seeded, not for security); asserts are
+# build-time invariants; templates are long and literal.
+extend = "../../../backend/pyproject.toml"
+src = [".."]
+
+[lint]
+extend-ignore = ["S101", "S311", "PLR2004", "PLR0912", "PLR0915", "PLR0917"]
+
+[lint.isort]
+known-first-party = ["generate", "check_corpus"]
+
+[lint.per-file-ignores]
+# Literal document text (clauses, legal sentences, templates) reads better unwrapped.
+"docx_docs.py" = ["E501"]
+"content.py" = ["E501"]
