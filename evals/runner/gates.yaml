@@ -1,0 +1,16 @@
+# Release gates for the eval set (Story 1.8; NFR-010, PRD test-suite table).
+# A gate with no applicable cases (e.g. all skipped) reports "n/a" and does not fail.
+gates:
+  overall_pass_rate:        # passed / scored cases (skipped excluded)
+    enabled: true
+    min: 0.85
+  summary_quality:          # share of summary cases scoring >= min_score on the rubric
+    enabled: true
+    min_score: 4
+    min_fraction: 0.85
+  ungrounded_figures:       # numbers in answers not in the grounding set
+    enabled: true
+    max: 0
+  excel_reference_match:    # excel_op cases whose output matches the reference cell-by-cell
+    enabled: true
+    min: 1.0

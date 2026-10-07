@@ -1,0 +1,31 @@
+# Summary rubric (Story 1.8; FR-046, NFR-010). Used by the LLM judge in evals/runner/judge.py.
+# Each dimension is scored 1-5; the case score is the mean, and it passes at >= pass_score.
+# The PRD gate: >= 85% of summaries score >= 4/5.
+name: summary
+pass_score: 4
+aggregate: mean
+dimensions:
+  coverage:
+    question: Does the summary cover what the template asks for, using the document's key facts?
+    anchors:
+      5: Every template section is addressed and every key fact in the reference list is present.
+      4: All sections addressed; at most one minor key fact missing.
+      3: One section thin or missing, or several key facts missing.
+      2: Several sections missing; reads as a partial summary.
+      1: Off-topic, empty, or mostly not about this document.
+  accuracy:
+    question: Is every statement and figure consistent with the reference facts and the document?
+    anchors:
+      5: No errors; figures exactly as in the document.
+      4: No material errors; at most one imprecise wording.
+      3: One material error (wrong figure, party, date or term).
+      2: Several material errors.
+      1: Mostly wrong or invented.
+  citations:
+    question: Does each point carry a citation to a plausible location in the document?
+    anchors:
+      5: Every point cited with a specific locator.
+      4: Nearly every point cited; locators specific.
+      3: Roughly half the points cited, or citations vague.
+      2: Few citations.
+      1: No citations.
