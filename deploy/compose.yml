@@ -1,0 +1,234 @@
+# invest-ai-llm single-host deployment (Story 1.3; ADR-034).
+#
+#   cp deploy/env.example deploy/.env      # non-secret settings only
+#   sudo docker compose -f deploy/compose.yml up -d
+#
+# Only `caddy` publishes a host port (8043). `app`, `inference` and `parsing` are
+# internal networks with no route out. Secrets are Compose file secrets (see
+# deploy/secrets/README.md), copied into /run/secrets with per-service ownership.
+# Requires Docker Compose >= 2.20 (`include:`); see deploy/runbook.md.
+
+name: invest-ai-llm
+
+include:
+  - compose.inference.yml       # Story 1.4: vllm-chat, vllm-guard
+  - compose.parser.yml          # Story 9.2: parser
+  - compose.observability.yml   # Story 7.10: jaeger (profile `observability`)
+
+x-app-secret: &app-secret
+  uid: "10001"
+  gid: "10001"
+  mode: 0400
+
+x-pg-secret: &pg-secret
+  uid: "999"
+  gid: "999"
+  mode: 0400
+
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+  logging:
+    driver: local
+    options:
+      max-size: 20m
+      max-file: "5"
+
+x-backend: &backend
+  <<: *hardening
+  image: invest-ai-llm/backend:${APP_VERSION:-dev}
+  build:
+    context: ../backend
+  pull_policy: never
+  init: true
+  tmpfs:
+    - /tmp:size=256m,mode=1777
+  environment:
+    APP_DATABASE_URL: postgresql+asyncpg://app_rw@postgres:5432/invest_ai
+    APP_MIGRATOR_DATABASE_URL: postgresql+asyncpg://app_migrator@postgres:5432/invest_ai
+    APP_LOG_LEVEL: ${APP_LOG_LEVEL:-INFO}
+
+services:
+  caddy:
+    <<: *hardening
+    image: invest-ai-llm/caddy:${APP_VERSION:-dev}
+    build:
+      context: ..
+      dockerfile: deploy/caddy/Dockerfile
+    pull_policy: never
+    # The caddy binary carries the cap_net_bind_service file capability; exec fails
+    # unless it stays in the bounding set.
+    cap_add: [NET_BIND_SERVICE]
+    ports:
+      - "8043:8043"
+    environment:
+      APP_SITE_ADDRESSES: ${APP_SITE_ADDRESSES:-https://localhost:8043}
+      APP_TLS: ${APP_TLS:-internal}
+    volumes:
+      # Caddy's internal CA and issued certificates persist across restarts.
+      - ${APP_DATA_DIR:-/data}/caddy:/data
+      # Optional provided certificate/key (APP_TLS="/etc/caddy/tls/cert.pem /etc/caddy/tls/key.pem").
+      - ${APP_TLS_DIR:-/etc/foundry/tls}:/etc/caddy/tls:ro
+    tmpfs:
+      - /config
+      - /tmp
+    networks: [edge, app]
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/caddy-health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api:
+    <<: *backend
+    command: ["api"]
+    networks: [app, inference]
+    secrets:
+      - { source: db_app_rw_password, <<: *app-secret }
+      - { source: kek, <<: *app-secret }
+      - { source: cache_salt_secret, <<: *app-secret }
+      - { source: audit_hmac_key, <<: *app-secret }
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  worker:
+    <<: *backend
+    command: ["worker"]
+    networks: [app, inference, parsing]
+    secrets:
+      - { source: db_app_rw_password, <<: *app-secret }
+      - { source: kek, <<: *app-secret }
+      - { source: cache_salt_secret, <<: *app-secret }
+      - { source: audit_hmac_key, <<: *app-secret }
+      - { source: backup_key, <<: *app-secret }
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
+    healthcheck:
+      # Replaced by a real liveness check in Story 1.11.
+      test: ["CMD", "python", "-c", "import app"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  migrate:
+    <<: *backend
+    command: ["migrate"]
+    restart: "no"
+    networks: [app]
+    secrets:
+      - { source: db_migrator_password, <<: *app-secret }
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: pgvector/pgvector:pg18
+    pull_policy: never
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+    security_opt: ["no-new-privileges:true"]
+    shm_size: 1g
+    environment:
+      POSTGRES_DB: invest_ai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_superuser_password
+    volumes:
+      - ${APP_DATA_DIR:-/data}/postgres:/var/lib/postgresql
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    secrets:
+      - { source: db_superuser_password, <<: *pg-secret }
+      - { source: db_migrator_password, <<: *pg-secret }
+      - { source: db_app_rw_password, <<: *pg-secret }
+    networks: [app]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "invest_ai"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging:
+      driver: local
+      options:
+        max-size: 20m
+        max-file: "5"
+
+  valkey:
+    <<: *hardening
+    image: valkey/valkey:8
+    pull_policy: never
+    user: "999:999"   # the image's valkey user; skips the entrypoint's chown
+    # Cache and rate-limit state only, never the source of truth (ADR-018): no
+    # persistence, so nothing is written to disk.
+    command:
+      - valkey-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --protected-mode
+      - "no"
+      - --maxmemory
+      - 1gb
+      - --maxmemory-policy
+      - noeviction
+    tmpfs:
+      - /data
+    networks: [app]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+networks:
+  edge:
+    # Inbound only: published-port traffic still works, but containers on this
+    # network get no outbound NAT.
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: "false"
+  app:
+    internal: true
+  inference:
+    internal: true
+  parsing:
+    internal: true
+
+secrets:
+  db_superuser_password:
+    file: ${APP_SECRETS_DIR:-/etc/foundry/secrets}/db_superuser_password
+  db_migrator_password:
+    file: ${APP_SECRETS_DIR:-/etc/foundry/secrets}/db_migrator_password
+  db_app_rw_password:
+    file: ${APP_SECRETS_DIR:-/etc/foundry/secrets}/db_app_rw_password
+  cache_salt_secret:
+    file: ${APP_SECRETS_DIR:-/etc/foundry/secrets}/cache_salt_secret
+  audit_hmac_key:
+    file: ${APP_SECRETS_DIR:-/etc/foundry/secrets}/audit_hmac_key
+  backup_key:
+    file: ${APP_SECRETS_DIR:-/etc/foundry/secrets}/backup_key
+  kek:
+    file: ${APP_KEK_FILE:-/etc/foundry/kek}

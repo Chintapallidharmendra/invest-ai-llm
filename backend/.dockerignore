@@ -1,0 +1,13 @@
+# Build context is backend/. Only app code, migrations and the lockfile go in.
+.venv/
+**/__pycache__/
+**/*.py[cod]
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.import_linter_cache/
+tests/
+.env
+.env.*
+*.kek
+**/backups/

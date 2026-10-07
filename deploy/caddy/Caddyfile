@@ -1,0 +1,73 @@
+# invest-ai-llm edge (ADR-034). Only this container publishes a host port (8043).
+#
+# Environment (non-secret, see deploy/env.example):
+#   APP_SITE_ADDRESSES  comma-separated site addresses, e.g.
+#                       "https://nbfcuatyolomlapp01:8043, https://10.0.0.4:8043"
+#   APP_TLS             "internal" (Caddy's local CA) or "<cert.pem> <key.pem>"
+{
+	admin off
+	auto_https disable_redirects
+	# No ACME, no OCSP fetches: the host has no internet route.
+	ocsp_stapling off
+	servers {
+		protocols h1 h2
+	}
+}
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		Content-Security-Policy "default-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+}
+
+{$APP_SITE_ADDRESSES:https://localhost:8043} {
+	tls {$APP_TLS:internal}
+	import security_headers
+
+	# Upload limit (FR-042). max_size caps bodies as they are read (including chunked
+	# uploads); the Content-Length check rejects oversized requests up front, even when
+	# the upstream would not read the body.
+	request_body {
+		max_size 50MB
+	}
+	@too_large expression `{header.Content-Length} != "" && int({header.Content-Length}) > 50000000`
+	handle @too_large {
+		header Content-Type "application/problem+json"
+		respond `{"type":"urn:invest-ai-llm:problem:file_too_large","title":"Request body too large","status":413,"detail":null,"instance":null,"code":"file_too_large","correlation_id":null}` 413 {
+			close
+		}
+	}
+
+	@backend path /api/* /healthz /readyz
+	handle @backend {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+
+	# Content-free access log (ADR-033): URIs (paths, query strings) and headers are
+	# dropped; method, status, size and duration remain.
+	log {
+		output stdout
+		format filter {
+			wrap json
+			request>uri delete
+			request>headers delete
+			request>tls delete
+			resp_headers delete
+		}
+	}
+}
+
+# Container healthcheck only; bound to loopback, never published.
+http://127.0.0.1:8080 {
+	respond /caddy-health 200
+}
