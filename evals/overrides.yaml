@@ -1,0 +1,11 @@
+# Human overrides for eval results (Story 1.8). The LLM judge runs on the same local
+# model it judges, so a reviewer can correct individual results here. Overrides are
+# recorded next to the judge's score in results.json and report.md, never silently.
+#
+# overrides:
+#   summary-alpha-executive:          # case id
+#     score: 4                        # summary score (1-5); or status: passed | failed
+#     reviewer: AB                    # initials, no names of real deal parties
+#     date: 2026-10-07
+#     note: Judge missed the projections section, which is present and cited.
+overrides: {}

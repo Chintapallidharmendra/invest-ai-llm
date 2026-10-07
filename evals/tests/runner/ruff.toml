@@ -1,0 +1,12 @@
+# Eval runner tests (Story 1.8): the backend rules with the usual test allowances.
+extend = "../../../backend/pyproject.toml"
+
+[lint]
+extend-ignore = ["S101", "PLR2004", "E501", "PT018"]
+
+[lint.per-file-ignores]
+# The stub app is one routing table.
+"test_targets_and_report.py" = ["PLR0911", "PLR0912"]
+
+[lint.isort]
+known-first-party = ["evals", "generate", "tests"]

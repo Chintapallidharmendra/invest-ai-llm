@@ -1,0 +1,13 @@
+# Eval runner (Story 1.8): the backend rules; first-party packages for import sorting.
+extend = "../../backend/pyproject.toml"
+
+[lint]
+# Eval tooling: asserts are invariants; authoring holds literal prompts and figures.
+extend-ignore = ["S101"]
+
+[lint.per-file-ignores]
+"authoring.py" = ["E501", "RUF001"]
+"clients/model.py" = ["E501"]  # the system prompt and templates are literal prose
+
+[lint.isort]
+known-first-party = ["evals", "generate", "tests"]
