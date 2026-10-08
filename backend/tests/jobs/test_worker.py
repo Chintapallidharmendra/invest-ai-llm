@@ -4,11 +4,13 @@ import asyncio
 import os
 import signal
 import socket
+from pathlib import Path
 from typing import Any
 
 import httpx
 import pytest
 
+import app
 from app.jobs import queue
 from app.jobs.models import JobStatus
 from app.jobs.settings import JobsSettings
@@ -51,8 +53,12 @@ async def test_health_app_has_no_api_routes() -> None:
 
 
 def test_discovery_imports_module_jobs_files() -> None:
-    # No feature module has a jobs.py yet; discovery must not import anything else.
-    assert discover_job_modules() == []
+    # Exactly the app/<module>/jobs.py files that exist, and nothing else.
+    expected = sorted(
+        f"app.{path.parent.name}.jobs" for path in Path(app.__file__).parent.glob("*/jobs.py")
+    )
+    assert discover_job_modules() == expected
+    assert "app.audit.jobs" in expected  # Story 7.1
 
 
 async def test_worker_serves_health_and_runs_jobs(

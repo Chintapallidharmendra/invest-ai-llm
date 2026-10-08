@@ -4,6 +4,7 @@ import asyncio
 import importlib
 import importlib.util
 import pkgutil
+import re
 from logging.config import fileConfig
 
 from alembic import context
@@ -32,10 +33,20 @@ target_metadata = Base.metadata
 database_url = get_settings().migrator_database_url.get_secret_value()
 
 
+# Monthly audit partitions are created at run time by audit_ensure_partitions (Story
+# 7.1), not by migrations: autogenerate must never see them as tables to drop.
+_RUNTIME_PARTITION = re.compile(r"audit_events_y[0-9]{4}m[0-9]{2}")
+
+
+def include_name(name: str | None, type_: str, parent_names: object) -> bool:
+    return not (type_ == "table" and name and _RUNTIME_PARTITION.fullmatch(name))
+
+
 def run_migrations_offline() -> None:
     context.configure(
         url=database_url,
         target_metadata=target_metadata,
+        include_name=include_name,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )
@@ -44,7 +55,9 @@ def run_migrations_offline() -> None:
 
 
 def _run_sync(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection, target_metadata=target_metadata, include_name=include_name
+    )
     with context.begin_transaction():
         context.run_migrations()
 
