@@ -19,6 +19,30 @@ or delete past entries — supersede them with a new entry that references the o
 
 ---
 
+### 2026-10-08 — Waves 4–5 compiled (12 stories); waves 0–3 marked done
+- **Decision:**
+  - **Waves 0–3 (15 stories) marked `done`** in `epics.md` (all merged to `main` by 2026-10-08).
+  - **12 stories compiled as `ready-for-dev`:**
+    - wave 4: 2.2, 8.2, 1.9, 10.3, 10.4
+    - wave 5: 2.3, 2.4, 2.5, 8.3, 7.2, 9.2, 3.1
+  - **Parallel-safety conventions added:**
+    - `auth`, `spaces` and `admin` `routes.py` mount every `routes_*.py` in their package, so wave 5 stories add endpoint files without editing a shared router (2.2, 8.2, 2.3).
+    - `audit.registry.discover()` also imports `audit_events_*.py`, so per-story event files stay under the `check_models` CI check (2.2).
+    - Private spaces are created by an `auth.user_created` core-event subscriber (8.2) that runs in 2.3's create-user transaction.
+    - `spaces.rls.enable_space_rls()` is the single RLS policy helper for every later content migration (8.2).
+  - **Carried-over follow-ups placed in stories:**
+    - 2.2 owns start-up wiring (password-policy preload; `kek_loaded` and LLM readiness registration in api and worker).
+    - 8.2 adds the `space_keys` / `object_keys` FKs deferred by 8.1.
+    - 3.1 accepts only an empty selected set until 9.1 registers a document resolver (documents arrive in wave 6).
+- **Scope check:** pairwise owned-scope overlap within each wave, scripted.
+  - Result: 1 overlap (the empty `tests/sheets/__init__.py`), resolved by giving it to 10.3.
+  - Wave 5's two migrations (7.2, 3.1) both revise `8_2_spaces`; the second to merge owns the `alembic merge` revision (noted in both stories). **0 unserialized conflicts.**
+- **Rationale:**
+  - Login, spaces/RLS and the pure engines (expressions, calculations) unblock the most later stories.
+  - The spike runs on UAT in parallel and can adjust † thresholds before chat work (wave 6+).
+- **Made by:** bmad-epics-and-stories (Create, waves 4–5)
+- **Supersedes:** none (extends "Story sharding: epic map + waves 0–3 compiled")
+
 ### 2026-10-07 — New repo invest-ai-llm; prototype dropped; project renamed
 - **Decision:**
   - All planning artifacts moved from `foundry_local/bmad-output/` to the new repo

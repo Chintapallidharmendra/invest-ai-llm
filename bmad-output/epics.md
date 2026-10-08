@@ -59,17 +59,17 @@ harnesses, a synthetic corpus, and an evidence-based model choice.
 
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
-| 1.1 | repo-scaffold-and-dependencies | Monorepo layout, all backend/frontend dependencies declared, lint, import-linter, gitleaks, gitignore | STORY-004 (part) | ready-for-dev |
-| 1.2 | core-platform-modules | config base, DB session + RLS context helper, RFC 9457 errors, IDs, obs logging allow-list, correlation-ID middleware, router auto-discovery, health/readiness registry | STORY-004 (part) | ready-for-dev |
-| 1.3 | compose-deployment-zero-egress | Compose stack (Caddy :8043, api, worker, postgres18+pgvector, valkey, migrate), internal networks, Docker data-root on `/data`, runbook v0 | STORY-004 (part) | ready-for-dev |
-| 1.4 | vllm-chat-and-guard-serving | vLLM services on the A10 (0.78/0.12 split), offline model staging, health checks | STORY-001 | ready-for-dev |
-| 1.5 | llm-gateway | `llm` module: stream/complete/structured/guard, model profiles, mandatory `cache_salt`, priorities, timeouts | STORY-001 (part) | ready-for-dev |
-| 1.6 | fake-llm-and-test-harness | OpenAI-compatible fake LLM server; pytest fixtures for Postgres (RLS) and Valkey | new | ready-for-dev |
-| 1.7 | synthetic-confidential-corpus | Fabricated CIMs, term-sheet versions, SPA, deck and workbooks with planted IDs, injections and canaries | STORY-002 (part) | ready-for-dev |
-| 1.8 | eval-harness-and-eval-set | Eval runner, YAML case schema, ≥ 80 cases + summary rubric, reports | STORY-002 | ready-for-dev |
-| 1.9 | model-selection-spike | Benchmark candidates on A10: quality, TTFT, tokens/s, summary throughput, `cache_salt` and priority support; record the decision | STORY-003 | backlog |
-| 1.10 | frontend-shell | Vite app shell, route auto-discovery, API client (CSRF, problem+json), query client, layout, design system setup | new | ready-for-dev |
-| 1.11 | jobs-queue-and-worker | Postgres `jobs` table, SKIP LOCKED runner, APScheduler entrypoint, Valkey GPU semaphore helper | new | ready-for-dev |
+| 1.1 | repo-scaffold-and-dependencies | Monorepo layout, all backend/frontend dependencies declared, lint, import-linter, gitleaks, gitignore | STORY-004 (part) | done |
+| 1.2 | core-platform-modules | config base, DB session + RLS context helper, RFC 9457 errors, IDs, obs logging allow-list, correlation-ID middleware, router auto-discovery, health/readiness registry | STORY-004 (part) | done |
+| 1.3 | compose-deployment-zero-egress | Compose stack (Caddy :8043, api, worker, postgres18+pgvector, valkey, migrate), internal networks, Docker data-root on `/data`, runbook v0 | STORY-004 (part) | done |
+| 1.4 | vllm-chat-and-guard-serving | vLLM services on the A10 (0.78/0.12 split), offline model staging, health checks | STORY-001 | done |
+| 1.5 | llm-gateway | `llm` module: stream/complete/structured/guard, model profiles, mandatory `cache_salt`, priorities, timeouts | STORY-001 (part) | done |
+| 1.6 | fake-llm-and-test-harness | OpenAI-compatible fake LLM server; pytest fixtures for Postgres (RLS) and Valkey | new | done |
+| 1.7 | synthetic-confidential-corpus | Fabricated CIMs, term-sheet versions, SPA, deck and workbooks with planted IDs, injections and canaries | STORY-002 (part) | done |
+| 1.8 | eval-harness-and-eval-set | Eval runner, YAML case schema, ≥ 80 cases + summary rubric, reports | STORY-002 | done |
+| 1.9 | model-selection-spike | Benchmark candidates on A10: quality, TTFT, tokens/s, summary throughput, `cache_salt` and priority support; record the decision | STORY-003 | ready-for-dev |
+| 1.10 | frontend-shell | Vite app shell, route auto-discovery, API client (CSRF, problem+json), query client, layout, design system setup | new | done |
+| 1.11 | jobs-queue-and-worker | Postgres `jobs` table, SKIP LOCKED runner, APScheduler entrypoint, Valkey GPU semaphore helper | new | done |
 
 **Cross-epic dependencies:**
 - Blocks: every other epic (foundation).
@@ -92,11 +92,11 @@ set-password links.
 
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
-| 2.1 | users-sessions-schema-and-passwords | users / sessions / password_tokens migrations, repositories, Argon2id + password policy | STORY-006 (part) | ready-for-dev |
-| 2.2 | login-logout-and-csrf | Login, logout, `/auth/me`, `__Host-` cookies, double-submit CSRF, lockout, `current_user` / `require_role` | STORY-006, STORY-009 | backlog |
-| 2.3 | admin-user-management-api | Create user (role), show-once link, re-issue, redeem set-password, deactivate/unlock, revoke sessions, `user_created` hook | STORY-005, STORY-007 | backlog |
-| 2.4 | change-own-password | FR-038 | STORY-008 | backlog |
-| 2.5 | auth-pages-ui | Login, set-password, change-password pages | STORY-006 (UI) | backlog |
+| 2.1 | users-sessions-schema-and-passwords | users / sessions / password_tokens migrations, repositories, Argon2id + password policy | STORY-006 (part) | done |
+| 2.2 | login-logout-and-csrf | Login, logout, `/auth/me`, `__Host-` cookies, double-submit CSRF, lockout, `current_user` / `require_role` | STORY-006, STORY-009 | ready-for-dev |
+| 2.3 | admin-user-management-api | Create user (role), show-once link, re-issue, redeem set-password, deactivate/unlock, revoke sessions, `user_created` hook | STORY-005, STORY-007 | ready-for-dev |
+| 2.4 | change-own-password | FR-038 | STORY-008 | ready-for-dev |
+| 2.5 | auth-pages-ui | Login, set-password, change-password pages | STORY-006 (UI) | ready-for-dev |
 | 2.6 | admin-users-ui | Admin user list, create-with-link modal, status actions | STORY-005/007 (UI) | backlog |
 
 **Cross-epic dependencies:**
@@ -121,9 +121,9 @@ envelope encryption, in place **before any content feature**.
 
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
-| 8.1 | crypto-key-hierarchy | `crypto` module: KEK file, space/object keys, AES-256-GCM fields + chunked files with AAD, key cache, shred primitives | STORY-051 | ready-for-dev |
-| 8.2 | spaces-and-rls-foundation | spaces / space_members, AccessContext dependency, RLS helper (`ENABLE`+`FORCE`), private space on user creation, `GET /spaces` | STORY-048 | backlog |
-| 8.3 | deal-workspaces-api | Create/rename/close workspace, add/remove members, owner rules, encrypted code names | STORY-049 | backlog |
+| 8.1 | crypto-key-hierarchy | `crypto` module: KEK file, space/object keys, AES-256-GCM fields + chunked files with AAD, key cache, shred primitives | STORY-051 | done |
+| 8.2 | spaces-and-rls-foundation | spaces / space_members, AccessContext dependency, RLS helper (`ENABLE`+`FORCE`), private space on user creation, `GET /spaces` | STORY-048 | ready-for-dev |
+| 8.3 | deal-workspaces-api | Create/rename/close workspace, add/remove members, owner rules, encrypted code names | STORY-049 | ready-for-dev |
 | 8.4 | workspaces-ui | Space switcher, create workspace, manage members | STORY-049 (UI) | backlog |
 | 8.5 | isolation-test-suite | ≥ 100-case isolation suite across every content route, search, job, export and cache path | STORY-050, STORY-052 (verification) | backlog |
 
@@ -152,7 +152,7 @@ citations.
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
 | 9.1 | upload-validation-and-storage | documents table (+RLS), multipart upload, type/magic/size/macro/encrypted/zip-bomb checks, encrypted original, duplicate detection, enqueue ingest | STORY-053 | backlog |
-| 9.2 | parser-container | Sandboxed parser service: Docling (PDF/DOCX/PPTX), openpyxl data-only, CSV, structured result with locators; resource limits, no network | STORY-054 (part) | backlog |
+| 9.2 | parser-container | Sandboxed parser service: Docling (PDF/DOCX/PPTX), openpyxl data-only, CSV, structured result with locators; resource limits, no network | STORY-054 (part) | ready-for-dev |
 | 9.3 | ocr-scanned-pages | RapidOCR for pages without text, `ocr` flag, page caps | STORY-056 | backlog |
 | 9.4 | ingestion-orchestration-and-storage | Ingest job: call parser, store encrypted segments/tables, statuses, resumability, notifications | STORY-054 (part) | backlog |
 | 9.5 | injection-scan-masking-and-report | Guard + heuristic injection scan, high-risk ID masking, ingestion report (FR-043) | STORY-055, STORY-019 (ingestion) | backlog |
@@ -186,7 +186,7 @@ starter prompts.
 
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
-| 3.1 | conversations-schema-and-api | conversations, conversation_documents, messages, message_tables/sources (+RLS, encrypted); CRUD; selected-set endpoint | STORY-012, STORY-047 | backlog |
+| 3.1 | conversations-schema-and-api | conversations, conversation_documents, messages, message_tables/sources (+RLS, encrypted); CRUD; selected-set endpoint | STORY-012, STORY-047 | ready-for-dev |
 | 3.2 | turn-orchestrator-and-sse | `handle_turn` with pluggable guard stages, SSE event models, persistence points, cancellation, status events | STORY-010 | backlog |
 | 3.3 | agent-tool-registry-and-context | PydanticAI agent, allow-list tool registry with AccessContext + selected-set injection, system prompt v1, `context.build` with rolling summary | STORY-011 | backlog |
 | 3.4 | chat-ui-streaming | Chat page, `useChatStream` reducer, tables, citation chips → viewer, stop/retry, status | STORY-010, STORY-013 (UI) | backlog |
@@ -214,10 +214,10 @@ output screening) plus the suites that prove it.
 
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
-| 4.1 | identifier-recognizers-library | Presidio high-risk recognisers (incl. custom India ones), `detect()` / `mask()`, benign allow-list | STORY-016 (part) | ready-for-dev |
+| 4.1 | identifier-recognizers-library | Presidio high-risk recognisers (incl. custom India ones), `detect()` / `mask()`, benign allow-list | STORY-016 (part) | done |
 | 4.2 | chat-identifier-gate-and-rate-limits | Stage 0 rate limits and quotas (Valkey) + stage 1 block (422 `pii_detected`) | STORY-016, STORY-045 | backlog |
 | 4.3 | guard-moderation-and-scope-router | Stages 2–3 with decline templates (barrier, insider misuse, off-topic, needs-internet, self-disclosure) | STORY-018, STORY-019 (chat) | backlog |
-| 4.4 | figure-grounding-library | Number extraction and normalisation (₹/crore/million/%/dates), match rules, exemptions | STORY-044 (part) | ready-for-dev |
+| 4.4 | figure-grounding-library | Number extraction and normalisation (₹/crore/million/%/dates), match rules, exemptions | STORY-044 (part) | done |
 | 4.5 | output-gate-and-final-moderation | Hold-back streaming gate, identifier output check, URL/image stripping, regenerate/replace, final moderation | STORY-021, STORY-044 | backlog |
 | 4.6 | fail-closed-and-fault-injection | Readiness dependencies, 503 paths, fault-injection tests for guard, parser, KEK and RLS context | STORY-023 | backlog |
 | 4.7 | identifier-test-suite | 300 positive + 200 benign cases across chat and file formats | STORY-017 | backlog |
@@ -246,8 +246,8 @@ operations with preview → confirm → new versioned workbook.
 |------|------|--------|-----------|--------|
 | 10.1 | sheet-ingestion-and-profiles | Sheets → encrypted Parquet + profile (header detection, types, counts, formulas without cache) | STORY-062 | backlog |
 | 10.2 | operation-catalogue-and-engine | Pydantic op union, validation against profile, Polars compilation, rlimited process pool | STORY-064 | backlog |
-| 10.3 | safe-expression-grammar | Calculated-column grammar → Polars expressions; no eval | STORY-064 (part) | backlog |
-| 10.4 | financial-calculation-engine | Decimal growth / CAGR / margin / ratio / multiple / sum / mean with input references | STORY-066 | backlog |
+| 10.3 | safe-expression-grammar | Calculated-column grammar → Polars expressions; no eval | STORY-064 (part) | ready-for-dev |
+| 10.4 | financial-calculation-engine | Decimal growth / CAGR / margin / ratio / multiple / sum / mean with input references | STORY-066 | ready-for-dev |
 | 10.5 | sheet-query-tools | `describe_workbook`, `query_sheet`, `calculate` tools with sheet!range citations | STORY-063 | backlog |
 | 10.6 | preview-confirm-apply | `preview_operations` → `plan` event; confirm endpoint → job → XLSX with Operations and Notes sheets | STORY-065 | backlog |
 | 10.7 | chained-operations-and-versions | Operate on the latest output; version links | STORY-067 | backlog |
@@ -275,8 +275,8 @@ content-free observability.
 
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
-| 7.1 | audit-writer-and-chain | Partitioned audit_events, metadata-only event registry with CI check, hash chain, verify job, anchors | STORY-037 | ready-for-dev |
-| 7.2 | outputs-and-watermarked-downloads | outputs + download_tokens (+RLS, encrypted files), watermark helper, 24 h links | STORY-071 | backlog |
+| 7.1 | audit-writer-and-chain | Partitioned audit_events, metadata-only event registry with CI check, hash chain, verify job, anchors | STORY-037 | done |
+| 7.2 | outputs-and-watermarked-downloads | outputs + download_tokens (+RLS, encrypted files), watermark helper, 24 h links | STORY-071 | ready-for-dev |
 | 7.3 | retention-expiry-and-warnings | `expires_at` on roots, hourly lifecycle job, T-7 warnings, one-time extension | STORY-068 | backlog |
 | 7.4 | delete-pipeline-and-deletion-suite | Crypto-shred, row/file deletion, VACUUM window; deletion canary suite | STORY-069 | backlog |
 | 7.5 | interim-backups-and-restore | Encrypted nightly backups to `/data/backups` (2 days), `local\|azure_blob` switch, restore runbook | STORY-041 | backlog |
@@ -327,11 +327,11 @@ content-free observability.
 No story points, velocity or burndown. Count only:
 
 - Total stories: **71**
-- Ready for dev: **15** (waves 0–3)
-- Backlog (not yet compiled): 56
-- Done: 0
-- Remaining: 71
-- Completion rate: 0 / 71
+- Done: **15** (waves 0–3, merged by 2026-10-08)
+- Ready for dev: **12** (waves 4–5)
+- Backlog (not yet compiled): 44
+- Remaining: 56
+- Completion rate: 15 / 71
 
 | Epic | Stories |
 |---|---|
