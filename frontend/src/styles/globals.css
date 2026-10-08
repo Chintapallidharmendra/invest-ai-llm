@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens (shadcn/ui naming). Every text/background pair meets WCAG 2.1 AA
+ * (>= 4.5:1 for text); `--input` and `--ring` meet 3:1 against the background for
+ * component boundaries and focus indicators (NFR-011). Ratios are against #ffffff
+ * unless noted.
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a; /* 17.9:1 */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #1d4ed8; /* white on it: 6.7:1 */
+  --primary-foreground: #ffffff;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #0f172a; /* 14.5:1 on secondary */
+  --muted: #f1f5f9;
+  --muted-foreground: #475569; /* 7.6:1; 6.9:1 on muted */
+  --accent: #e2e8f0;
+  --accent-foreground: #0f172a;
+  --destructive: #b91c1c; /* white on it: 6.5:1 */
+  --destructive-foreground: #ffffff;
+  --success: #15803d; /* white on it: 5.0:1 */
+  --success-foreground: #ffffff;
+  --warning: #92400e; /* white on it: 7.1:1 */
+  --warning-foreground: #ffffff;
+  --border: #e2e8f0; /* decorative separators only */
+  --input: #64748b; /* 4.8:1 */
+  --ring: #1d4ed8; /* 6.7:1 */
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    color-scheme: light;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* A visible focus indicator everywhere, even where a component sets none. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
