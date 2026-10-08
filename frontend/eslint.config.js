@@ -12,7 +12,11 @@ export default tseslint.config(
       ecmaVersion: 2022,
       globals: globals.browser,
       parserOptions: {
-        projectService: true,
+        // tsconfig.json covers src/; the root configs and e2e/ use tsconfig.node.json.
+        projectService: {
+          allowDefaultProject: ["*.config.ts", "e2e/*.ts"],
+          defaultProject: "tsconfig.node.json",
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
