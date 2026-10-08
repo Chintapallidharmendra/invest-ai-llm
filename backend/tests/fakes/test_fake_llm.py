@@ -14,6 +14,8 @@ from typing import cast
 import httpx
 import openai
 import pytest
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from sqlalchemy import text
@@ -21,7 +23,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from valkey.asyncio import Valkey
 
 from app.core.db import transaction
-from tests.conftest import COMPOSE_TEST_FILE, PgDatabase
+from tests.conftest import BACKEND_DIR, COMPOSE_TEST_FILE, PgDatabase
 from tests.fakes.fake_llm import (
     DEFAULT_TEXT,
     Error,
@@ -299,6 +301,11 @@ async def test_app_client_healthz(app_client: httpx.AsyncClient) -> None:
     assert response.json() == {"status": "ok"}
 
 
+def _alembic_head() -> str | None:
+    config = Config(str(BACKEND_DIR / "alembic.ini"))
+    return ScriptDirectory.from_config(config).get_current_head()
+
+
 @pytest.mark.db
 async def test_app_session_is_app_rw_without_bypassrls(pg: PgDatabase) -> None:
     async with transaction() as session:
@@ -313,7 +320,8 @@ async def test_app_session_is_app_rw_without_bypassrls(pg: PgDatabase) -> None:
     assert tuple(row) == ("app_rw", False, False)
     async with transaction() as session:
         version = await session.execute(text("SELECT version_num FROM alembic_version"))
-        assert version.scalar() == "1_2_baseline"
+        # Migrated to head (whatever the latest story's revision is).
+        assert version.scalar() == _alembic_head()
 
 
 @pytest.fixture(scope="module")
