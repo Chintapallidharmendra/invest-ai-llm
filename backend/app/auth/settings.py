@@ -34,6 +34,17 @@ class AuthSettings(BaseSettings):
     # One-time set-password links (invite / reset).
     password_token_ttl_s: Annotated[int, Field(gt=0)] = 24 * 3600
 
+    # Login protection (Story 2.2): consecutive failures before a lock, and its length.
+    login_max_failures: Annotated[int, Field(ge=1)] = 5
+    lockout_s: Annotated[int, Field(gt=0)] = 15 * 60
+    # Login attempts per client IP per window (Valkey fixed window).
+    login_rate_limit: Annotated[int, Field(ge=1)] = 10
+    login_rate_window_s: Annotated[int, Field(gt=0)] = 60
+    # Origins allowed on state-changing requests, e.g. ["https://invest-ai.example"]
+    # (JSON list in APP_AUTH_SITE_ORIGINS). A request passes the origin check if its
+    # Origin is listed or the browser sends Sec-Fetch-Site: same-origin.
+    site_origins: list[str] = []
+
     @property
     def session_absolute_ttl(self) -> timedelta:
         return timedelta(seconds=self.session_absolute_ttl_s)
@@ -41,6 +52,10 @@ class AuthSettings(BaseSettings):
     @property
     def session_idle_timeout(self) -> timedelta:
         return timedelta(seconds=self.session_idle_timeout_s)
+
+    @property
+    def lockout(self) -> timedelta:
+        return timedelta(seconds=self.lockout_s)
 
     @property
     def password_token_ttl(self) -> timedelta:

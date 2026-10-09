@@ -33,7 +33,8 @@ def _add_test_routes(app: FastAPI) -> None:
 
 @pytest.fixture
 def client(logs: LogCapture) -> Iterator[TestClient]:
-    app = create_app(configure_logs=False)
+    # These tests drive /readyz with their own registry, so no start-up checks.
+    app = create_app(configure_logs=False, readiness_checks=False)
     _add_test_routes(app)
     with TestClient(app, raise_server_exceptions=False) as test_client:
         yield test_client

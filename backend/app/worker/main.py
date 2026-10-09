@@ -28,11 +28,13 @@ from app.api import health
 from app.core.config import get_settings
 from app.core.db import dispose_engine
 from app.core.obs import configure_logging, get_logger
+from app.crypto import kek
 from app.jobs import service
 from app.jobs.queue import Runner
 from app.jobs.scheduler import build_scheduler
 from app.jobs.semaphore import GpuSemaphore
 from app.jobs.settings import JobsSettings, get_jobs_settings
+from app.llm import readiness as llm_readiness
 
 _log = get_logger("worker")
 
@@ -84,6 +86,8 @@ async def run_worker(
         valkey, limit=settings.heavy_concurrency, ttl_s=settings.semaphore_ttl_s
     )
     service.register_checks(semaphore)
+    kek.register_checks()
+    llm_readiness.register_checks()
     runner = Runner(settings, semaphore=semaphore)
     scheduler = build_scheduler(settings.timezone)
     server = _HealthServer(
@@ -107,6 +111,8 @@ async def run_worker(
         server.should_exit = True
         await server_task
         service.unregister_checks()
+        kek.unregister_checks()
+        llm_readiness.unregister_checks()
         await valkey.aclose()
         await dispose_engine()
         if install_signal_handlers:

@@ -1,6 +1,7 @@
 """Registry of audit event models (ADR-032).
 
-Each module declares its events in ``app/<module>/audit_events.py`` as subclasses of
+Each module declares its events in ``app/<module>/audit_events.py`` (or, so stories
+don't share one file, ``app/<module>/audit_events_<topic>.py``) as subclasses of
 :class:`app.audit.types.AuditEvent`; defining the class registers it. :func:`discover`
 imports every such module (the CI check and the writer's callers rely on it).
 """
@@ -43,12 +44,27 @@ def registered() -> dict[str, type["AuditEvent"]]:
     return dict(_models)
 
 
+def _event_modules(package: str) -> list[str]:
+    spec = importlib.util.find_spec(package)
+    locations = spec.submodule_search_locations if spec is not None else None
+    if not locations:
+        return []
+    names = [
+        info.name
+        for info in pkgutil.iter_modules(locations)
+        if not info.ispkg and (info.name == "audit_events" or info.name.startswith("audit_events_"))
+    ]
+    return [f"{package}.{name}" for name in sorted(names)]
+
+
 def discover() -> list[str]:
-    """Import every ``app/<module>/audit_events.py``; returns the module names."""
+    """Import every ``app/<module>/audit_events.py`` and ``audit_events_*.py``;
+    returns the module names."""
     imported = []
     for info in sorted(pkgutil.iter_modules(app.__path__), key=lambda i: i.name):
-        name = f"app.{info.name}.audit_events"
-        if info.ispkg and importlib.util.find_spec(name) is not None:
+        if not info.ispkg:
+            continue
+        for name in _event_modules(f"app.{info.name}"):
             importlib.import_module(name)
             imported.append(name)
     return imported

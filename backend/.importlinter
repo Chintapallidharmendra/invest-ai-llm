@@ -23,7 +23,7 @@ ignore_imports =
 unmatched_ignore_imports_alerting = none
 
 [importlinter:contract:only-crypto-imports-cryptography]
-name = Only app.crypto imports cryptography
+name = Only app.crypto imports cryptography directly (other modules use app.crypto)
 type = forbidden
 source_modules =
     app.core
@@ -45,6 +45,8 @@ source_modules =
     app.worker
 forbidden_modules =
     cryptography
+; Indirect imports through app.crypto are the point: everyone encrypts via app.crypto.
+allow_indirect_imports = True
 
 [importlinter:contract:only-llm-imports-openai]
 name = Only app.llm imports openai directly (pydantic_ai's internal use is allowed)
