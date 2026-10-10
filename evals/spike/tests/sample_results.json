@@ -1,0 +1,64 @@
+{
+  "spike": {
+    "host": "uat-a10",
+    "gpu": "NVIDIA A10-24Q (vGPU)",
+    "date": "2026-10-20",
+    "vllm_image": "vllm/vllm-openai:v0.0.0-sample",
+    "git_commit": "abc1234",
+    "guard": "Qwen3Guard-Gen-0.6B",
+    "gpu_split": "0.78 / 0.12"
+  },
+  "candidates": [
+    {
+      "name": "Qwen3-14B-AWQ",
+      "quantisation": "AWQ INT4",
+      "started": true,
+      "start_error": null,
+      "max_model_len": 16384,
+      "max_num_seqs": 16,
+      "quality": {
+        "overall": {"total": 90, "scored": 80, "passed": 70, "skipped": 10, "pass_rate": 0.875},
+        "categories": {
+          "qa": {"total": 20, "passed": 18, "failed": 2, "skipped": 0, "error": 0, "needs_review": 0, "pass_rate": 0.9},
+          "concept": {"total": 2, "passed": 2, "failed": 0, "skipped": 0, "error": 0, "needs_review": 0, "pass_rate": 1.0}
+        }
+      },
+      "tool_calls": {
+        "summary": {"total": 35, "valid": 35, "right_tool": 33, "right_args": 31,
+                    "failures": {"wrong_args": 2, "wrong_tool": 2},
+                    "valid_rate": 1.0, "right_tool_rate": 0.943, "right_args_rate": 0.886},
+        "cases": []
+      },
+      "performance": {
+        "levels": [
+          {"concurrency": 1, "requests": 3, "errors": 0, "ttft_p50_s": 0.21, "ttft_p95_s": 0.25, "tokens_per_s_p50": 48.2, "tokens_per_s_p5": 47.0},
+          {"concurrency": 10, "requests": 30, "errors": 0, "ttft_p50_s": 0.9, "ttft_p95_s": 1.8, "tokens_per_s_p50": 19.5, "tokens_per_s_p5": 16.1}
+        ],
+        "with_summaries": {
+          "chat": {"concurrency": 10, "requests": 30, "errors": 0, "ttft_p50_s": 1.2, "ttft_p95_s": 2.6, "tokens_per_s_p50": 17.2, "tokens_per_s_p5": 14.0},
+          "summaries": {"loops": 2, "completed": 14, "errors": 0, "map_calls_per_min": 7.1, "latency_p50_s": 16.0}
+        }
+      },
+      "soak": {
+        "duration_s": 1800, "errors": 0, "oom_signs": 0, "preemptions": 0, "kv_usage_max": 0.91, "passed": true,
+        "chat": {"requests": 2100, "errors": 0},
+        "summaries": {"completed": 210, "errors": 0, "map_calls_per_min": 7.0},
+        "gpu": {"samples": 120, "mem_used_max_mib": 22100, "headroom_min_mib": 2476, "sm_clock_ratio_min": 0.97, "temp_max_c": 74, "temp_first_last_c": [61, 72]}
+      },
+      "features": {
+        "cache_salt": {"verdict": "honoured", "detail": "hits only within one salt", "observations": {}},
+        "priority": {"verdict": "honoured", "detail": "high priority jumped the queue", "observations": {}},
+        "thinking": {"verdict": "pass", "detail": "no thinking output", "observations": {}},
+        "hermes": {"verdict": "pass", "detail": "parsed tool call", "observations": {}}
+      }
+    },
+    {
+      "name": "gpt-oss-20b",
+      "quantisation": "MXFP4",
+      "started": false,
+      "start_error": "MXFP4 kernels need compute capability >= 9.0",
+      "max_model_len": 16384,
+      "max_num_seqs": 16
+    }
+  ]
+}

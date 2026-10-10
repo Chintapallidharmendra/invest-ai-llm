@@ -1,0 +1,13 @@
+# Model spike tooling (Story 1.9): the backend rules; first-party packages for sorting.
+extend = "../../backend/pyproject.toml"
+
+[lint]
+extend-ignore = ["S101"]
+
+[lint.per-file-ignores]
+"tests/**" = ["PLR2004", "E501"]
+"cli.py" = ["E501"]  # the usage examples in the docstring
+"report.py" = ["E501"]  # one table row per line reads better
+
+[lint.isort]
+known-first-party = ["evals", "tests"]

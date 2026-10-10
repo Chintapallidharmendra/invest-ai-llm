@@ -111,3 +111,87 @@ models:
       - path: vocab.json
         size: 2776833
         sha256: ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910
+  # Spike candidates (Story 1.9): staged for the A10 comparison only. Hashes from the
+  # pinned Hugging Face revision on 2026-10-09 (LFS object ids for weights; computed
+  # for small files). gpt-oss-20b is tried only if it starts on Ampere.
+  - name: Qwen2.5-14B-Instruct-AWQ
+    role: chat-candidate
+    source: https://huggingface.co/Qwen/Qwen2.5-14B-Instruct-AWQ
+    revision: 539535859b135b0244c91f3e59816150c8056698
+    license: apache-2.0
+    files:
+      - path: LICENSE
+        size: 11343
+        sha256: 832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e
+      - path: config.json
+        size: 841
+        sha256: 0c174aa8d52f5dec4c2e0d4b3ec4b1ff261d16bb80b58f03c1c06528e6ed6640
+      - path: generation_config.json
+        size: 243
+        sha256: 9df8ac8558514924f3481a609f1e5590ab4416efc600b12ad805155d79581c59
+      - path: merges.txt
+        size: 1671839
+        sha256: 599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3
+      - path: model-00001-of-00003.safetensors
+        size: 3988804408
+        sha256: 4e874dc3b1febb5b22fe74a8793066ae430d90cdbc51765d0a4eb44a82a1fbbd
+      - path: model-00002-of-00003.safetensors
+        size: 3968309440
+        sha256: b3b25da74cc854cdc726956f8152f1dda8519c7bb7d4724ac12c1312463e61c8
+      - path: model-00003-of-00003.safetensors
+        size: 2023056736
+        sha256: 25b97bf28033ed4560387293ce76bd3dc55a22882fea005a10c137b6478dae85
+      - path: model.safetensors.index.json
+        size: 107402
+        sha256: ffa9ad9dba1428d7e924ab03ab51b28865ddfad58b60f4d3d786f4f811a723cc
+      - path: tokenizer.json
+        size: 7031645
+        sha256: c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539
+      - path: tokenizer_config.json
+        size: 7305
+        sha256: 5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583
+      - path: vocab.json
+        size: 2776833
+        sha256: ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910
+  - name: gpt-oss-20b
+    role: chat-candidate
+    source: https://huggingface.co/openai/gpt-oss-20b
+    revision: 6cee5e81ee83917806bbde320786a8fb61efebee
+    license: apache-2.0
+    files:
+      - path: LICENSE
+        size: 11357
+        sha256: 58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd
+      - path: USAGE_POLICY
+        size: 200
+        sha256: d6387ef7985019c45db8d9801e6ac5fd9f98f02b9f1c56f8c5af80c3e8f385d0
+      - path: chat_template.jinja
+        size: 16738
+        sha256: a4c9919cbbd4acdd51ccffe22da049264b1b73e59055fa58811a99efbd7c8146
+      - path: config.json
+        size: 1806
+        sha256: 3a2a26ded679375b7928ddeca59764df7cea83220c1961035f6d6e232659e9ce
+      - path: generation_config.json
+        size: 177
+        sha256: f9970ada892d2d1f72e3ed0a6535ccebadd11897318794ca671d8c7014c957da
+      - path: model-00000-of-00002.safetensors
+        size: 4792272488
+        sha256: 16d0f997dcfc4462089d536bffe51b4bcea2f872f5c430be09ef8ed392312427
+      - path: model-00001-of-00002.safetensors
+        size: 4798702184
+        sha256: 4fbe328ab445455d6f58dc73852b85873bd626986310abd91cd4d2ce3245eaea
+      - path: model-00002-of-00002.safetensors
+        size: 4170342232
+        sha256: a18106b209e9ab35c3406db4f6f12a927364a058b21e9d1373d682e20674b303
+      - path: model.safetensors.index.json
+        size: 36355
+        sha256: 0e085b977c4c9942f85938828e8c989ed7d5cdabf852e4da6a67c116cd502cd1
+      - path: special_tokens_map.json
+        size: 98
+        sha256: dd5e191d20c12d2fee1da5bae14ca1db0f5f4215300af691f23cdee97120a293
+      - path: tokenizer.json
+        size: 27868174
+        sha256: 0614fe83cadab421296e664e1f48f4261fa8fef6e03e63bb75c20f38e37d07d3
+      - path: tokenizer_config.json
+        size: 4200
+        sha256: 9279e942392b742d633c7adbb89ebe002c98399db8926a7af5125c726f404070

@@ -1,0 +1,269 @@
+# Tool-call accuracy prompts (Story 1.9, AC #2): finance requests over a synthetic
+# selected set, each with the tool and arguments a correct agent would use (ADR-026).
+# Synthetic names only (the Story 1.7 corpus). Matchers: see scorer.py.
+system: |
+  You are a confidential deal-document assistant for an investment bank. Work only from
+  the selected documents listed below, through the tools. Never do arithmetic yourself:
+  use `calculate` with the cited inputs. Pass document IDs exactly as listed. Answer
+  general finance questions (definitions, concepts) directly, without tools.
+
+  Selected documents:
+  - 0198f3a2-0000-7000-8000-000000000001  Nilgiri Logistics - Information Memorandum.pdf (PDF, 48 pages)
+  - 0198f3a2-0000-7000-8000-000000000002  Nilgiri Logistics - Invoices FY25.xlsx (workbook, 3 sheets: Invoices, Customers, Summary)
+  - 0198f3a2-0000-7000-8000-000000000003  Project Falcon - CIM FY25.pdf (PDF, 72 pages)
+  - 0198f3a2-0000-7000-8000-000000000004  Project Kestrel - Teaser.docx (Word, 6 pages)
+
+cases:
+  # --- list_selected_documents ---------------------------------------------------------
+  - id: tc01
+    prompt: Which documents do I have selected, and how long is each?
+    expect: {tool: list_selected_documents}
+  - id: tc02
+    prompt: How many sheets are in the files I picked? List them first.
+    expect: {tool: list_selected_documents}
+
+  # --- search_documents ------------------------------------------------------------------
+  - id: tc03
+    prompt: What was Nilgiri's EBITDA in FY25 according to the IM?
+    expect:
+      tool: search_documents
+      args:
+        query: {contains_any: [ebitda]}
+  - id: tc04
+    prompt: Find where the Falcon CIM discusses customer concentration.
+    expect:
+      tool: search_documents
+      args:
+        query: {contains_any: [customer, concentration]}
+  - id: tc05
+    prompt: Who are the promoters of Nilgiri Logistics and what is their shareholding?
+    expect:
+      tool: search_documents
+      args:
+        query: {contains_any: [promoter, shareholding, shareholder]}
+  - id: tc06
+    prompt: Does the Kestrel teaser mention a proposed transaction structure?
+    expect:
+      tool: search_documents
+      args:
+        query: {contains_any: [transaction, structure, deal]}
+  - id: tc07
+    prompt: What are the key risks listed in the Falcon CIM? Only search that document.
+    expect:
+      tool: search_documents
+      args:
+        query: {contains_any: [risk]}
+        document_ids: {contains: [0198f3a2-0000-7000-8000-000000000003]}
+  - id: tc08
+    prompt: What is the net debt position of Project Falcon at the end of FY25?
+    expect:
+      tool: search_documents
+      args:
+        query: {contains_any: [debt]}
+
+  # --- read_pages ------------------------------------------------------------------------
+  - id: tc09
+    prompt: Read pages 12 to 14 of the Nilgiri IM.
+    expect:
+      tool: read_pages
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000001}
+        from: {equals: 12}
+        to: {equals: 14}
+  - id: tc10
+    prompt: Show me the first three pages of the Kestrel teaser.
+    expect:
+      tool: read_pages
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000004}
+        from: {equals: 1}
+        to: {equals: 3}
+  - id: tc11
+    prompt: Open page 40 of the Falcon CIM.
+    expect:
+      tool: read_pages
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000003}
+        from: {equals: 40}
+        to: {range: [40, 41]}
+
+  # --- get_document_table / extract_table_to_excel ---------------------------------------
+  - id: tc12
+    prompt: Give me the table p.12#t1 from the Nilgiri IM.
+    expect:
+      tool: get_document_table
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000001}
+        table_ref: {equals: p.12#t1}
+  - id: tc13
+    prompt: Show the segment revenue table p.18#t2 in the Falcon CIM.
+    expect:
+      tool: get_document_table
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000003}
+        table_ref: {equals: p.18#t2}
+  - id: tc14
+    prompt: Export table p.12#t1 from the Nilgiri IM to Excel.
+    expect:
+      tool: extract_table_to_excel
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000001}
+        table_ref: {equals: p.12#t1}
+  - id: tc15
+    prompt: I need the Falcon P&L table (p.22#t1) as an xlsx file.
+    expect:
+      tool: extract_table_to_excel
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000003}
+        table_ref: {equals: p.22#t1}
+
+  # --- start_summary / start_comparison --------------------------------------------------
+  - id: tc16
+    prompt: Prepare an executive summary of the Falcon CIM.
+    expect:
+      tool: start_summary
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000003}
+        template: {equals: executive}
+  - id: tc17
+    prompt: Summarise the Nilgiri IM's financials in detail, focusing on working capital.
+    expect:
+      tool: start_summary
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000001}
+        template: {one_of: [financials, detailed]}
+        focus: {contains_any: [working capital]}
+  - id: tc18
+    prompt: Compare the Falcon CIM with the Kestrel teaser.
+    expect:
+      tool: start_comparison
+      args:
+        document_a: {one_of: [0198f3a2-0000-7000-8000-000000000003, 0198f3a2-0000-7000-8000-000000000004]}
+        document_b: {one_of: [0198f3a2-0000-7000-8000-000000000003, 0198f3a2-0000-7000-8000-000000000004]}
+  - id: tc19
+    prompt: Compare the Nilgiri IM and the Falcon CIM on margins and leverage.
+    expect:
+      tool: start_comparison
+      args:
+        document_a: {one_of: [0198f3a2-0000-7000-8000-000000000001, 0198f3a2-0000-7000-8000-000000000003]}
+        document_b: {one_of: [0198f3a2-0000-7000-8000-000000000001, 0198f3a2-0000-7000-8000-000000000003]}
+        focus: {contains_any: [margin, leverage]}
+
+  # --- describe_workbook / query_sheet / preview_operations -------------------------------
+  - id: tc20
+    prompt: What columns does the invoices workbook have?
+    expect:
+      tool: describe_workbook
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000002}
+  - id: tc21
+    prompt: Total invoice amount by customer from the Invoices sheet.
+    expect:
+      tool: query_sheet
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000002}
+        sheet: {equals: Invoices}
+  - id: tc22
+    prompt: In the Invoices sheet, show only invoices above 10 lakh, largest first.
+    expect:
+      tool: query_sheet
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000002}
+        sheet: {equals: Invoices}
+  - id: tc23
+    prompt: How many customers are in the Customers sheet of the invoices file?
+    expect:
+      tool: query_sheet
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000002}
+        sheet: {equals: Customers}
+  - id: tc24
+    prompt: Remove duplicate invoice numbers from the Invoices sheet and give me a new file.
+    expect:
+      tool: preview_operations
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000002}
+  - id: tc25
+    prompt: Add a column "GST" as 18% of Amount to the Invoices sheet and prepare the file.
+    expect:
+      tool: preview_operations
+      args:
+        document_id: {equals: 0198f3a2-0000-7000-8000-000000000002}
+
+  # --- calculate --------------------------------------------------------------------------
+  - id: tc26
+    prompt: Revenue was ₹812.4 crore in FY22 (IM p.12) and ₹1,250.0 crore in FY25 (IM p.14). What is the CAGR?
+    expect:
+      tool: calculate
+      args:
+        metric: {equals: cagr}
+        inputs:
+          length: 2
+          items:
+            - {value: {equals: "812.4"}}
+            - {value: {equals: "1250.0"}}
+  - id: tc27
+    prompt: EBITDA grew from ₹210 crore in FY24 to ₹265 crore in FY25 (CIM p.22). What's the growth?
+    expect:
+      tool: calculate
+      args:
+        metric: {equals: growth}
+        inputs:
+          length: 2
+          items:
+            - {value: {equals: "210"}}
+            - {value: {equals: "265"}}
+  - id: tc28
+    prompt: FY25 EBITDA was ₹265 crore on revenue of ₹1,250 crore (CIM p.22). What's the EBITDA margin?
+    expect:
+      tool: calculate
+      args:
+        metric: {equals: margin}
+        inputs:
+          length: 2
+          items:
+            - {value: {equals: "265"}}
+            - {value: {equals: "1250"}}
+  - id: tc29
+    prompt: Enterprise value is ₹3,975 crore and FY25 EBITDA ₹265 crore (CIM p.30, p.22). What's the EV/EBITDA multiple?
+    expect:
+      tool: calculate
+      args:
+        metric: {equals: multiple}
+        inputs:
+          length: 2
+          items:
+            - {value: {equals: "3975"}}
+            - {value: {equals: "265"}}
+  - id: tc30
+    prompt: Net debt is ₹540 crore and equity ₹1,800 crore (IM p.31). What's the net debt to equity ratio?
+    expect:
+      tool: calculate
+      args:
+        metric: {equals: ratio}
+        inputs: {length: 2}
+  - id: tc31
+    prompt: Quarterly revenue was ₹290, ₹305, ₹318 and ₹337 crore (IM p.15). What's the full-year total?
+    expect:
+      tool: calculate
+      args:
+        metric: {equals: sum}
+        inputs: {length: 4}
+  - id: tc32
+    prompt: Margins over three years were 18.2%, 19.5% and 21.2% (CIM p.23). What's the average margin?
+    expect:
+      tool: calculate
+      args:
+        metric: {equals: mean}
+        inputs: {length: 3}
+
+  # --- no tool (concepts, chit-chat) -------------------------------------------------------
+  - id: tc33
+    prompt: In general terms, what does EBITDA measure?
+    expect: {tool: null}
+  - id: tc34
+    prompt: What is the difference between enterprise value and equity value?
+    expect: {tool: null}
+  - id: tc35
+    prompt: Thanks, that's all for now.
+    expect: {tool: null}
