@@ -1,0 +1,63 @@
+// Calculated-column expressions (Story 10.3; ADR-030). A closed language: nothing
+// outside this grammar parses. Keywords and function names are case-insensitive.
+//
+//   [Revenue] - [Cost]
+//   IF([Margin %] >= 20, "high", "low")
+//   ROUND([EBITDA] / [Revenue] * 100, 1)
+
+start: expr
+
+?expr: or_expr
+
+// Chains of one precedence level are flat (`a + b - c` is one `sum` node), so depth
+// measures real nesting and long chains don't recurse.
+?or_expr: and_expr (OR and_expr)*
+
+?and_expr: not_expr (AND not_expr)*
+
+?not_expr: comparison
+         | NOT not_expr -> not_op
+
+// Non-associative: `a < b < c` is a syntax error.
+?comparison: sum
+           | sum COMP_OP sum -> compare
+
+?sum: product ((PLUS | MINUS) product)*
+
+?product: unary ((STAR | SLASH) unary)*
+
+?unary: atom
+      | MINUS unary -> neg
+
+?atom: NUMBER -> number
+     | STRING -> string
+     | TRUE -> true
+     | FALSE -> false
+     | BRACKET_COLUMN -> bracket_column
+     | NAME -> bare_column
+     | NAME "(" [expr ("," expr)*] ")" -> call
+     | "(" expr ")" -> paren
+
+// Keywords outrank NAME; `\b` keeps `order` or `notes` a NAME.
+OR.2: /or\b/i
+AND.2: /and\b/i
+NOT.2: /not\b/i
+TRUE.2: /true\b/i
+FALSE.2: /false\b/i
+
+COMP_OP: "<=" | ">=" | "<>" | "<" | ">" | "="
+PLUS: "+"
+MINUS: "-"
+STAR: "*"
+SLASH: "/"
+
+// Digits with an optional fraction and exponent: 12, 1.5, .5, 2e6.
+NUMBER: /(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?/
+// Double-quoted; a doubled quote is a literal quote (as in Excel).
+STRING: /"(?:[^"]|"")*"/
+// [Any name]; a doubled ]] is a literal ].
+BRACKET_COLUMN: /\[(?:[^\]]|\]\])+\]/
+// Starts with a letter (so no `_` or `__dunder__` names), then letters, digits, `_`.
+NAME: /[^\W\d_]\w*/
+
+%ignore /[ \t\r\n]+/
