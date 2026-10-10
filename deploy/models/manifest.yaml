@@ -195,3 +195,41 @@ models:
       - path: tokenizer_config.json
         size: 4200
         sha256: 9279e942392b742d633c7adbb89ebe002c98399db8926a7af5125c726f404070
+  # Docling (Story 9.2): the parser's layout and TableFormer models. Named as Docling
+  # expects its artifact folders; mounted read-only into the parser container.
+  - name: docling-project--docling-layout-heron
+    role: parser-layout
+    source: https://huggingface.co/docling-project/docling-layout-heron
+    revision: 8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+    license: apache-2.0
+    files:
+      - path: config.json
+        size: 3268
+        sha256: fdea30805ce2f5666b147fca941dcdd27ad468e27d6ed21902207d3da056a97d
+      - path: model.safetensors
+        size: 171658996
+        sha256: 00333a43451945aaf89db8ca9c0a17e75d1537c17db60fdb91aa95f4c7929e0c
+      - path: preprocessor_config.json
+        size: 444
+        sha256: cd38cd59999e7a95d68e487fbe5132df3d4e5c32a0836add57e6126ba0c4eaf1
+  - name: docling-project--docling-models
+    role: parser-tables
+    source: https://huggingface.co/docling-project/docling-models
+    revision: fc0f2d45e2218ea24bce5045f58a389aed16dc23
+    license: cdla-permissive-2.0
+    files:
+      - path: config.json
+        size: 41
+        sha256: 9c34024dc28ff47b75818f415e769809798c29bf9bde6f2ccc63a4acb62396d9
+      - path: model_artifacts/tableformer/accurate/tableformer_accurate.safetensors
+        size: 212758388
+        sha256: 2a7d6c924b3cd12fb99a09280ca9c33a89c5d60b93253617d2e088c1a40374d9
+      - path: model_artifacts/tableformer/accurate/tm_config.json
+        size: 7060
+        sha256: 984e122ceb8ccf84d84c9d2882f6f2302a44b4f1e577babd6289892c36f3cffd
+      - path: model_artifacts/tableformer/fast/tableformer_fast.safetensors
+        size: 145453276
+        sha256: 3119563aab5a7c96fda4d621119b63fd8806272b86c30936d15507616422f718
+      - path: model_artifacts/tableformer/fast/tm_config.json
+        size: 7060
+        sha256: dca6762508dddfae6d57d6cb4ef822c6000119dff0f3b6489db7413118c2622a
