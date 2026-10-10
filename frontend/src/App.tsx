@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router/dom";
 
 import { LOGIN_PATH, setUnauthorizedHandler } from "@/api/client";
 import { queryClient as defaultQueryClient } from "@/api/queryClient";
+import { AuthProvider } from "@/auth/AuthProvider";
 import { loginPath, RequireAuth } from "@/auth/RequireAuth";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { RouteError } from "@/components/layout/RouteError";
@@ -60,7 +61,9 @@ export function App({ routes = appRoutes, queryClient = defaultQueryClient }: Ap
     <QueryClientProvider client={queryClient}>
       <TooltipProvider delayDuration={300}>
         <Toaster>
-          <RouterProvider router={router} />
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
         </Toaster>
       </TooltipProvider>
     </QueryClientProvider>
