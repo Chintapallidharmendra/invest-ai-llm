@@ -14,9 +14,14 @@ import app
 from app.jobs import queue
 from app.jobs.models import JobStatus
 from app.jobs.settings import JobsSettings
+from app.llm.gateway import close_gateway
 from app.worker.main import create_health_app, discover_job_modules, run_worker
 from tests.conftest import PgDatabase
+from tests.crypto.conftest import kek_bytes
+from tests.fakes.fake_llm import FakeLLM
 from tests.jobs.conftest import USER_A, Recorder, all_jobs, fetch_job, make_settings
+
+__all__ = ["kek_bytes"]
 
 
 def _free_port() -> int:
@@ -62,8 +67,14 @@ def test_discovery_imports_module_jobs_files() -> None:
 
 
 async def test_worker_serves_health_and_runs_jobs(
-    jobs_db: PgDatabase, job_types: Recorder, valkey_url: str
+    jobs_db: PgDatabase,
+    job_types: Recorder,
+    valkey_url: str,
+    kek_bytes: bytes,
+    fake_llm_env: FakeLLM,
 ) -> None:
+    # The worker's readiness includes the KEK and both LLM servers (Story 2.2).
+    await close_gateway()
     port = _free_port()
     stop = asyncio.Event()
     settings = make_settings(valkey_url, health_port=port)
@@ -87,6 +98,7 @@ async def test_worker_serves_health_and_runs_jobs(
     finally:
         stop.set()
         await asyncio.wait_for(task, timeout=10)
+        await close_gateway()
 
 
 async def _run_until_sigterm(settings: JobsSettings, recorder: Recorder) -> None:
