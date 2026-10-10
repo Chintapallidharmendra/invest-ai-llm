@@ -73,7 +73,8 @@ async def test_no_secret_in_audit_logs_or_responses(auth_env: AuthEnv, logs: Log
 def test_every_auth_event_is_metadata_only() -> None:
     registry.discover()
     events = {k: v for k, v in registry.registered().items() if k.startswith("auth.")}
-    assert set(events) == {
+    # Later stories add auth events in audit_events_*.py files; these must be present.
+    assert set(events) >= {
         "auth.login_succeeded",
         "auth.login_failed",
         "auth.account_locked",
