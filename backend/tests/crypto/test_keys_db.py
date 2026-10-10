@@ -31,7 +31,7 @@ from app.crypto.keys import (
 from app.crypto.models import ObjectKey, SpaceKey
 from app.crypto.shred import shred_object, shred_space
 from tests.conftest import BACKEND_DIR, PgDatabase
-from tests.crypto.conftest import new_object, reset_crypto
+from tests.crypto.conftest import new_object, new_space, reset_crypto
 
 pytestmark = [pytest.mark.db, pytest.mark.usefixtures("crypto_db")]
 
@@ -109,7 +109,7 @@ def test_migration_down_and_up(pg: PgDatabase) -> None:
 
 async def test_a_space_key_unwrapped_with_another_space_id_fails(pg: PgDatabase) -> None:
     ref = await new_object()
-    other_space = uuid.uuid4()
+    other_space = await new_space()
     async with transaction() as tx:
         row = (await tx.execute(select(SpaceKey))).scalar_one()
         # Copy space A's wrapped key into space B's row.
@@ -141,7 +141,7 @@ async def test_an_object_key_moved_to_another_object_fails() -> None:
 
 
 async def test_create_is_idempotent_and_concurrency_safe() -> None:
-    space_id, object_id = uuid.uuid4(), uuid.uuid4()
+    space_id, object_id = await new_space(), uuid.uuid4()
     async with transaction() as tx:
         assert await create_space_key(tx, space_id)
     async with transaction() as tx:
@@ -163,7 +163,7 @@ async def test_create_is_idempotent_and_concurrency_safe() -> None:
 
 async def test_an_object_cannot_be_rekeyed_into_another_space() -> None:
     ref = await new_object()
-    other_space = uuid.uuid4()
+    other_space = await new_space()
     async with transaction() as tx:
         await create_space_key(tx, other_space)
     _cold()
@@ -175,7 +175,7 @@ async def test_an_object_cannot_be_rekeyed_into_another_space() -> None:
 
 
 async def test_encrypt_works_inside_the_creating_transaction() -> None:
-    space_id = uuid.uuid4()
+    space_id = await new_space()
     async with transaction() as tx:
         await create_space_key(tx, space_id)
         ref = await create_object_key(tx, space_id, "conversation", uuid.uuid4())
@@ -289,7 +289,7 @@ async def test_rotation_rewraps_space_keys_without_reencrypting(
 async def test_rotation_is_all_or_nothing(pg: PgDatabase, tmp_path: Path) -> None:
     await new_object()
     await new_object()
-    stray = uuid.uuid4()
+    stray = await new_space()
     async with transaction() as tx:
         row = (await tx.execute(select(SpaceKey))).scalars().first()
         assert row is not None

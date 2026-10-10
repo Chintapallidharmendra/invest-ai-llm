@@ -1,5 +1,6 @@
 """Fixtures for the crypto tests: a test KEK in a tmp secret file, fresh caches, and
-helpers that create space and object keys."""
+helpers that create spaces (key rows reference ``spaces`` since Story 8.2), space keys
+and object keys."""
 
 import os
 import uuid
@@ -7,6 +8,7 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+from sqlalchemy import text
 
 from app.core.db import transaction
 from app.crypto import kek as kek_module
@@ -40,8 +42,26 @@ async def crypto_db(pg: PgDatabase, kek_bytes: bytes) -> PgDatabase:
     return pg
 
 
+async def new_space() -> uuid.UUID:
+    """A bare private space (and its invited owner), with no key yet."""
+    space_id, owner_id = uuid.uuid4(), uuid.uuid4()
+    async with transaction() as tx:
+        await tx.execute(
+            text(
+                "INSERT INTO users (id, username, email, role, status) "
+                "VALUES (:id, :name, :email, 'user', 'invited')"
+            ),
+            {"id": owner_id, "name": f"u{owner_id.hex[:12]}", "email": f"{owner_id.hex}@t.test"},
+        )
+        await tx.execute(
+            text("INSERT INTO spaces (id, kind, owner_user_id) VALUES (:id, 'private', :owner)"),
+            {"id": space_id, "owner": owner_id},
+        )
+    return space_id
+
+
 async def new_object(space_id: uuid.UUID | None = None, object_type: str = "document") -> KeyRef:
-    space_id = space_id or uuid.uuid4()
+    space_id = space_id or await new_space()
     async with transaction() as tx:
         await create_space_key(tx, space_id)
         return await create_object_key(tx, space_id, object_type, uuid.uuid4())
