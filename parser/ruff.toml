@@ -1,0 +1,8 @@
+# Parser (Story 9.2): the backend's rules; first-party packages for import sorting.
+extend = "../backend/pyproject.toml"
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004", "E501", "S603", "S607", "S310"]
+
+[lint.isort]
+known-first-party = ["app", "tests"]
