@@ -19,6 +19,31 @@ or delete past entries — supersede them with a new entry that references the o
 
 ---
 
+### 2026-10-12 — Waves 6–7 compiled (12 stories); waves 4–5 marked done
+- **Decision:**
+  - **Waves 4–5 marked `done`** in `epics.md` (merged to `main` by 2026-10-10), except **1.9**: its tooling is merged but the UAT benchmark run is pending (`in-progress`).
+  - **12 stories compiled as `ready-for-dev`:**
+    - wave 6: 2.6, 8.4, 9.1, 9.3, 3.2, 10.2
+    - wave 7: 9.4, 4.2, 4.3, 4.5, 3.6, 3.3
+  - **3.3 moved from wave 6 to wave 7.** It implements the `AgentRunner` contract that 3.2 defines in `assistant/contract.py`; running both in one wave would mean two stories editing one file.
+  - **Turn-pipeline contracts live below `chat`:** `.importlinter` forbids domain modules from importing `app.chat`, so 3.2 puts the stage contracts in `guardrails/pipeline.py` and the agent contract in `assistant/contract.py`. Guard stages plug in as `guardrails/stage_*.py` modules (discovered); tools as `app/<module>/assistant_tools.py` (3.3).
+  - **Fail closed until the guards exist:** a missing stage slot (0–3, output gate, final moderation) or a missing agent runner makes chat return 503, and `/readyz` fails. Only `APP_CHAT_ALLOW_MISSING_STAGES=true` (tests, local dev) bypasses this. Between the wave 6 and wave 7 merges, the deployed app therefore refuses chat turns.
+  - **Fail closed until masking exists:** 9.4 stores only text that a registered `SegmentProcessor` has processed. Without one (9.5 arrives in wave 8), ingestion ends `failed`/`masking_unavailable`, so unmasked text is never stored (ADR-027).
+  - **Scope moves:**
+    - Upload quotas (FR-037) move from 4.2 to 9.1, which owns the upload endpoint.
+    - 9.1 wires the selected-set resolver from the chat side (`chat/selected_set.py`), and owns the compose mounts for `/data/files`, a read-only `/models` and an api `tmpfs` at `/tmp`.
+    - 3.2 adds `GET /conversations/{id}/messages` (history for the chat UI), which no story had.
+    - 9.3 adds a batched `/ocr` parser endpoint (≤ 20 pages per call), because a 300-page scan cannot fit one `/parse` CPU budget, and batching makes OCR resumable.
+    - 4.5 replaces ungrounded figures inline with "[couldn't verify]" rather than regenerating (FR-036 allows either). An identifier in the output withholds the whole answer.
+  - **New story 9.15 `notifications-api` (backlog, wave 8):** no story owned the `notifications` table or API. 9.4 emits `documents.ingestion_finished` for 9.15 to consume. Total stories: 72.
+- **Scope check:** pairwise owned-scope overlap within each wave, scripted: wave 6 (55 paths) and wave 7 (53 paths), **0 overlaps**. Wave 7's two migrations (9.4 `9_4_segments`, 3.6 `3_6_feedback`) both revise `9_1_documents`; whichever merges second owns the `alembic merge` revision (noted in both stories).
+- **Known gaps (not yet in any story):**
+  - Admin-configurable limits (FR-037, `GET/PUT /admin/settings`); chat limits and quotas are env settings for now.
+  - Document moves between spaces need re-encryption (AAD includes `space_id`); left with 9.8.
+- **Rationale:** after wave 5, the upload and chat paths (9.1, 3.2) unblock the most stories. Guard stages, the agent and ingestion follow in wave 7, on contracts fixed in wave 6.
+- **Made by:** bmad-epics-and-stories (Create, waves 6–7)
+- **Supersedes:** none (extends "Waves 4–5 compiled")
+
 ### 2026-10-08 — Waves 4–5 compiled (12 stories); waves 0–3 marked done
 - **Decision:**
   - **Waves 0–3 (15 stories) marked `done`** in `epics.md` (all merged to `main` by 2026-10-08).

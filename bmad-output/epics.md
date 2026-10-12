@@ -67,7 +67,7 @@ harnesses, a synthetic corpus, and an evidence-based model choice.
 | 1.6 | fake-llm-and-test-harness | OpenAI-compatible fake LLM server; pytest fixtures for Postgres (RLS) and Valkey | new | done |
 | 1.7 | synthetic-confidential-corpus | Fabricated CIMs, term-sheet versions, SPA, deck and workbooks with planted IDs, injections and canaries | STORY-002 (part) | done |
 | 1.8 | eval-harness-and-eval-set | Eval runner, YAML case schema, ≥ 80 cases + summary rubric, reports | STORY-002 | done |
-| 1.9 | model-selection-spike | Benchmark candidates on A10: quality, TTFT, tokens/s, summary throughput, `cache_salt` and priority support; record the decision | STORY-003 | ready-for-dev |
+| 1.9 | model-selection-spike | Benchmark candidates on A10: quality, TTFT, tokens/s, summary throughput, `cache_salt` and priority support; record the decision | STORY-003 | in-progress (tooling merged; UAT run pending) |
 | 1.10 | frontend-shell | Vite app shell, route auto-discovery, API client (CSRF, problem+json), query client, layout, design system setup | new | done |
 | 1.11 | jobs-queue-and-worker | Postgres `jobs` table, SKIP LOCKED runner, APScheduler entrypoint, Valkey GPU semaphore helper | new | done |
 
@@ -93,11 +93,11 @@ set-password links.
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
 | 2.1 | users-sessions-schema-and-passwords | users / sessions / password_tokens migrations, repositories, Argon2id + password policy | STORY-006 (part) | done |
-| 2.2 | login-logout-and-csrf | Login, logout, `/auth/me`, `__Host-` cookies, double-submit CSRF, lockout, `current_user` / `require_role` | STORY-006, STORY-009 | ready-for-dev |
-| 2.3 | admin-user-management-api | Create user (role), show-once link, re-issue, redeem set-password, deactivate/unlock, revoke sessions, `user_created` hook | STORY-005, STORY-007 | ready-for-dev |
-| 2.4 | change-own-password | FR-038 | STORY-008 | ready-for-dev |
-| 2.5 | auth-pages-ui | Login, set-password, change-password pages | STORY-006 (UI) | ready-for-dev |
-| 2.6 | admin-users-ui | Admin user list, create-with-link modal, status actions | STORY-005/007 (UI) | backlog |
+| 2.2 | login-logout-and-csrf | Login, logout, `/auth/me`, `__Host-` cookies, double-submit CSRF, lockout, `current_user` / `require_role` | STORY-006, STORY-009 | done |
+| 2.3 | admin-user-management-api | Create user (role), show-once link, re-issue, redeem set-password, deactivate/unlock, revoke sessions, `user_created` hook | STORY-005, STORY-007 | done |
+| 2.4 | change-own-password | FR-038 | STORY-008 | done |
+| 2.5 | auth-pages-ui | Login, set-password, change-password pages | STORY-006 (UI) | done |
+| 2.6 | admin-users-ui | Admin user list, create-with-link modal, status actions | STORY-005/007 (UI) | ready-for-dev |
 
 **Cross-epic dependencies:**
 - Blocked by: Epic 1 (1.1, 1.2, 1.10); 7.1 (audit writer) for audited actions.
@@ -122,9 +122,9 @@ envelope encryption, in place **before any content feature**.
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
 | 8.1 | crypto-key-hierarchy | `crypto` module: KEK file, space/object keys, AES-256-GCM fields + chunked files with AAD, key cache, shred primitives | STORY-051 | done |
-| 8.2 | spaces-and-rls-foundation | spaces / space_members, AccessContext dependency, RLS helper (`ENABLE`+`FORCE`), private space on user creation, `GET /spaces` | STORY-048 | ready-for-dev |
-| 8.3 | deal-workspaces-api | Create/rename/close workspace, add/remove members, owner rules, encrypted code names | STORY-049 | ready-for-dev |
-| 8.4 | workspaces-ui | Space switcher, create workspace, manage members | STORY-049 (UI) | backlog |
+| 8.2 | spaces-and-rls-foundation | spaces / space_members, AccessContext dependency, RLS helper (`ENABLE`+`FORCE`), private space on user creation, `GET /spaces` | STORY-048 | done |
+| 8.3 | deal-workspaces-api | Create/rename/close workspace, add/remove members, owner rules, encrypted code names | STORY-049 | done |
+| 8.4 | workspaces-ui | Space switcher, create workspace, manage members | STORY-049 (UI) | ready-for-dev |
 | 8.5 | isolation-test-suite | ≥ 100-case isolation suite across every content route, search, job, export and cache path | STORY-050, STORY-052 (verification) | backlog |
 
 **Cross-epic dependencies:**
@@ -151,10 +151,10 @@ citations.
 
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
-| 9.1 | upload-validation-and-storage | documents table (+RLS), multipart upload, type/magic/size/macro/encrypted/zip-bomb checks, encrypted original, duplicate detection, enqueue ingest | STORY-053 | backlog |
-| 9.2 | parser-container | Sandboxed parser service: Docling (PDF/DOCX/PPTX), openpyxl data-only, CSV, structured result with locators; resource limits, no network | STORY-054 (part) | ready-for-dev |
-| 9.3 | ocr-scanned-pages | RapidOCR for pages without text, `ocr` flag, page caps | STORY-056 | backlog |
-| 9.4 | ingestion-orchestration-and-storage | Ingest job: call parser, store encrypted segments/tables, statuses, resumability, notifications | STORY-054 (part) | backlog |
+| 9.1 | upload-validation-and-storage | documents table (+RLS), multipart upload, type/magic/size/macro/encrypted/zip-bomb checks, encrypted original, duplicate detection, upload quotas, enqueue ingest, selected-set resolver | STORY-053 | ready-for-dev |
+| 9.2 | parser-container | Sandboxed parser service: Docling (PDF/DOCX/PPTX), openpyxl data-only, CSV, structured result with locators; resource limits, no network | STORY-054 (part) | done |
+| 9.3 | ocr-scanned-pages | RapidOCR for pages without text, `ocr` flag, page caps | STORY-056 | ready-for-dev |
+| 9.4 | ingestion-orchestration-and-storage | Ingest job: call parser, store encrypted segments/tables, statuses, resumability, notifications | STORY-054 (part) | ready-for-dev |
 | 9.5 | injection-scan-masking-and-report | Guard + heuristic injection scan, high-risk ID masking, ingestion report (FR-043) | STORY-055, STORY-019 (ingestion) | backlog |
 | 9.6 | chunking-embeddings-and-search | Section-aware chunks, offline bge-small embeddings, tsvector, space-scoped hybrid RRF search service | STORY-057 | backlog |
 | 9.7 | citation-viewer | `/documents/{id}/view`: PDF page image (pypdfium2), slide text, sheet range | STORY-013 (backend) | backlog |
@@ -165,6 +165,7 @@ citations.
 | 9.12 | document-comparison | `start_comparison` job: section alignment, diff, explanations, changed-figures table | STORY-060 | backlog |
 | 9.13 | table-extraction-to-excel | `extract_table_to_excel` → XLSX output with source notes | STORY-061 | backlog |
 | 9.14 | malicious-file-suite | ≥ 30 hostile files (macros, zip bombs, external links, huge sheets, malformed) as a release gate | new (NFR-025) | backlog |
+| 9.15 | notifications-api | `notifications` table (+RLS), subscriber to `documents.ingestion_finished` and job completion, `GET /notifications`, `POST /notifications/{id}/read` | new (FR-042/FR-046 notifications) | backlog |
 
 **Cross-epic dependencies:**
 - Blocked by: Epic 8 (spaces, RLS, crypto); 1.11 (jobs); 4.1 (identifier library, for 9.5); 1.5 (guard model, for 9.5); 3.3 (agent/tool registry, for 9.9/9.11–9.13); 7.2 (outputs, for 9.11/9.13).
@@ -186,12 +187,12 @@ starter prompts.
 
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
-| 3.1 | conversations-schema-and-api | conversations, conversation_documents, messages, message_tables/sources (+RLS, encrypted); CRUD; selected-set endpoint | STORY-012, STORY-047 | ready-for-dev |
-| 3.2 | turn-orchestrator-and-sse | `handle_turn` with pluggable guard stages, SSE event models, persistence points, cancellation, status events | STORY-010 | backlog |
-| 3.3 | agent-tool-registry-and-context | PydanticAI agent, allow-list tool registry with AccessContext + selected-set injection, system prompt v1, `context.build` with rolling summary | STORY-011 | backlog |
+| 3.1 | conversations-schema-and-api | conversations, conversation_documents, messages, message_tables/sources (+RLS, encrypted); CRUD; selected-set endpoint | STORY-012, STORY-047 | done |
+| 3.2 | turn-orchestrator-and-sse | `handle_turn` with pluggable guard stages, SSE event models, persistence points, cancellation, status events | STORY-010 | ready-for-dev |
+| 3.3 | agent-tool-registry-and-context | PydanticAI agent, allow-list tool registry with AccessContext + selected-set injection, system prompt v1, `context.build` with rolling summary | STORY-011 | ready-for-dev |
 | 3.4 | chat-ui-streaming | Chat page, `useChatStream` reducer, tables, citation chips → viewer, stop/retry, status | STORY-010, STORY-013 (UI) | backlog |
 | 3.5 | chat-ui-documents-history-starters | Selected-set picker, conversation list, starter prompts | STORY-047 (UI), STORY-012, STORY-014 | backlog |
-| 3.6 | answer-ratings | Thumbs up/down + encrypted comment | STORY-015 | backlog |
+| 3.6 | answer-ratings | Thumbs up/down + encrypted comment | STORY-015 | ready-for-dev |
 
 **Cross-epic dependencies:**
 - Blocked by: Epic 8; 1.5; 1.6; 9.7 (viewer, for 3.4 citations).
@@ -215,10 +216,10 @@ output screening) plus the suites that prove it.
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
 | 4.1 | identifier-recognizers-library | Presidio high-risk recognisers (incl. custom India ones), `detect()` / `mask()`, benign allow-list | STORY-016 (part) | done |
-| 4.2 | chat-identifier-gate-and-rate-limits | Stage 0 rate limits and quotas (Valkey) + stage 1 block (422 `pii_detected`) | STORY-016, STORY-045 | backlog |
-| 4.3 | guard-moderation-and-scope-router | Stages 2–3 with decline templates (barrier, insider misuse, off-topic, needs-internet, self-disclosure) | STORY-018, STORY-019 (chat) | backlog |
+| 4.2 | chat-identifier-gate-and-rate-limits | Stage 0 chat rate limits (Valkey) + stage 1 block (422 `pii_detected`); upload quotas moved to 9.1 | STORY-016, STORY-045 | ready-for-dev |
+| 4.3 | guard-moderation-and-scope-router | Stages 2–3 with decline templates (barrier, insider misuse, off-topic, needs-internet, self-disclosure) | STORY-018, STORY-019 (chat) | ready-for-dev |
 | 4.4 | figure-grounding-library | Number extraction and normalisation (₹/crore/million/%/dates), match rules, exemptions | STORY-044 (part) | done |
-| 4.5 | output-gate-and-final-moderation | Hold-back streaming gate, identifier output check, URL/image stripping, regenerate/replace, final moderation | STORY-021, STORY-044 | backlog |
+| 4.5 | output-gate-and-final-moderation | Hold-back streaming gate, identifier output check, URL/image stripping, regenerate/replace, final moderation | STORY-021, STORY-044 | ready-for-dev |
 | 4.6 | fail-closed-and-fault-injection | Readiness dependencies, 503 paths, fault-injection tests for guard, parser, KEK and RLS context | STORY-023 | backlog |
 | 4.7 | identifier-test-suite | 300 positive + 200 benign cases across chat and file formats | STORY-017 | backlog |
 | 4.8 | red-team-suite | ≥ 100 cases (≥ 50 document-embedded) | STORY-020 | backlog |
@@ -245,9 +246,9 @@ operations with preview → confirm → new versioned workbook.
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
 | 10.1 | sheet-ingestion-and-profiles | Sheets → encrypted Parquet + profile (header detection, types, counts, formulas without cache) | STORY-062 | backlog |
-| 10.2 | operation-catalogue-and-engine | Pydantic op union, validation against profile, Polars compilation, rlimited process pool | STORY-064 | backlog |
-| 10.3 | safe-expression-grammar | Calculated-column grammar → Polars expressions; no eval | STORY-064 (part) | ready-for-dev |
-| 10.4 | financial-calculation-engine | Decimal growth / CAGR / margin / ratio / multiple / sum / mean with input references | STORY-066 | ready-for-dev |
+| 10.2 | operation-catalogue-and-engine | Pydantic op union, validation against profile, Polars compilation, rlimited process pool | STORY-064 | ready-for-dev |
+| 10.3 | safe-expression-grammar | Calculated-column grammar → Polars expressions; no eval | STORY-064 (part) | done |
+| 10.4 | financial-calculation-engine | Decimal growth / CAGR / margin / ratio / multiple / sum / mean with input references | STORY-066 | done |
 | 10.5 | sheet-query-tools | `describe_workbook`, `query_sheet`, `calculate` tools with sheet!range citations | STORY-063 | backlog |
 | 10.6 | preview-confirm-apply | `preview_operations` → `plan` event; confirm endpoint → job → XLSX with Operations and Notes sheets | STORY-065 | backlog |
 | 10.7 | chained-operations-and-versions | Operate on the latest output; version links | STORY-067 | backlog |
@@ -276,7 +277,7 @@ content-free observability.
 | ID | Slug | Intent | PRD story | Status |
 |------|------|--------|-----------|--------|
 | 7.1 | audit-writer-and-chain | Partitioned audit_events, metadata-only event registry with CI check, hash chain, verify job, anchors | STORY-037 | done |
-| 7.2 | outputs-and-watermarked-downloads | outputs + download_tokens (+RLS, encrypted files), watermark helper, 24 h links | STORY-071 | ready-for-dev |
+| 7.2 | outputs-and-watermarked-downloads | outputs + download_tokens (+RLS, encrypted files), watermark helper, 24 h links | STORY-071 | done |
 | 7.3 | retention-expiry-and-warnings | `expires_at` on roots, hourly lifecycle job, T-7 warnings, one-time extension | STORY-068 | backlog |
 | 7.4 | delete-pipeline-and-deletion-suite | Crypto-shred, row/file deletion, VACUUM window; deletion canary suite | STORY-069 | backlog |
 | 7.5 | interim-backups-and-restore | Encrypted nightly backups to `/data/backups` (2 days), `local\|azure_blob` switch, restore runbook | STORY-041 | backlog |
@@ -304,9 +305,9 @@ content-free observability.
 | 3 | 1.4, 1.5, 2.1, 8.1, 1.8, 7.1 |
 | 4 | 2.2, 8.2, 1.9 (spike), 10.3, 10.4 |
 | 5 | 2.3, 2.4, 2.5, 8.3, 7.2, 9.2, 3.1 |
-| 6 | 2.6, 8.4, 9.1, 9.3, 3.2, 3.3, 10.2 |
-| 7 | 9.4, 4.2, 4.3, 4.5, 3.6 |
-| 8 | 9.5, 9.6, 9.7, 10.1, 4.6 |
+| 6 | 2.6, 8.4, 9.1, 9.3, 3.2, 10.2 |
+| 7 | 9.4, 4.2, 4.3, 4.5, 3.6, 3.3 |
+| 8 | 9.5, 9.6, 9.7, 10.1, 4.6, 9.15 |
 | 9 | 9.8, 9.9, 3.4, 10.5, 9.10 |
 | 10 | 3.5, 9.11, 9.12, 9.13, 10.6, 7.3, 7.6 |
 | 11 | 10.7, 10.8, 7.4, 7.5, 7.7, 7.9, 7.10 |
@@ -326,12 +327,13 @@ content-free observability.
 
 No story points, velocity or burndown. Count only:
 
-- Total stories: **71**
-- Done: **15** (waves 0–3, merged by 2026-10-08)
-- Ready for dev: **12** (waves 4–5)
-- Backlog (not yet compiled): 44
-- Remaining: 56
-- Completion rate: 15 / 71
+- Total stories: **72** (9.15 added 2026-10-12)
+- Done: **26** (waves 0–5 merged by 2026-10-10, except 1.9)
+- In progress: **1** (1.9: tooling merged, UAT benchmark run pending)
+- Ready for dev: **12** (waves 6–7)
+- Backlog (not yet compiled): 33
+- Remaining: 46
+- Completion rate: 26 / 72
 
 | Epic | Stories |
 |---|---|
@@ -341,7 +343,7 @@ No story points, velocity or burndown. Count only:
 | 4 Guardrails | 9 |
 | 7 Lifecycle & audit | 11 |
 | 8 Workspaces & isolation | 5 |
-| 9 Documents | 14 |
+| 9 Documents | 15 |
 | 10 Excel | 9 |
 
 ## Notes
