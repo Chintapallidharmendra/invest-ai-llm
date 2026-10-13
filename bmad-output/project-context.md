@@ -152,8 +152,8 @@ making decisions that might contradict earlier ones. Pre-pivot artifacts are arc
 ## Planning Status (count-based)
 
 - **Track:** bmad-method
-- **Stories defined:** 71 in `epics.md`; 15 compiled `ready-for-dev` (waves 0–3)
-- **Stories remaining:** 71 (0 done). Count-based delivery; no points, no velocity.
+- **Stories defined:** 72 in `epics.md`; 26 done (waves 0–5), 12 `ready-for-dev` (waves 6–7)
+- **Stories remaining:** 46. Count-based delivery; no points, no velocity.
 
 _This document plans the work. Implementation is handed to external dev tools via
 ready-for-dev story files; the planning plugin never writes or tests application code._
